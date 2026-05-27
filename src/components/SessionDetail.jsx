@@ -193,7 +193,7 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
           {!isGym&&isDone&&(
             <div style={{display:'flex',gap:8}}>
               <button onClick={()=>onUntick(wkIdx,s.id)} style={{background:S.card,color:S.muted,border:`1px solid ${S.border}`,borderRadius:13,padding:'14px 18px',fontSize:14,fontWeight:600,cursor:'pointer'}}>↺</button>
-              <button onClick={handleTick} style={{flex:1,background:S.card,color:S.text,border:`1px solid ${S.green}`,borderRadius:13,padding:14,fontSize:14,fontWeight:700,cursor:'pointer'}}>Update Log</button>
+              <button onClick={()=>{handleTick();setTimeout(onBack,400);}} style={{flex:1,background:S.card,color:S.text,border:`1px solid ${S.green}`,borderRadius:13,padding:14,fontSize:14,fontWeight:700,cursor:'pointer'}}>Update Log</button>
             </div>
           )}
         </div>
