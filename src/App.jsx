@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { PLAN as BAKED_PLAN } from './plan.js';
 import { DB, getCurWk } from './utils.js';
-import { supabase, loadPlanFromDB, savePlanToDB, loadCompletionsFromDB, saveCompletionToDB, deleteCompletionFromDB, loadGymLogsFromDB, saveGymLogToDB, loadHistoryFromDB, saveHistoryEntryToDB } from './supabase.js';
+import { supabase, loadPlanFromDB, savePlanToDB, loadCompletionsFromDB, saveCompletionToDB, deleteCompletionFromDB, loadGymLogsFromDB, saveGymLogToDB, loadHistoryFromDB, saveHistoryEntryToDB, deleteHistoryEntryFromDB } from './supabase.js';
 import AuthScreen from './components/AuthScreen.jsx';
 import Splash from './components/Splash.jsx';
 import Shell from './components/Shell.jsx';
@@ -53,7 +53,8 @@ export default function App() {
       else { await savePlanToDB(userId, BAKED_PLAN); }
       if (Object.keys(dbComp).length > 0) setComp(dbComp);
       if (Object.keys(dbGym).length > 0) setGymLogs(dbGym);
-      if (dbHist.length > 0) setHistory(dbHist);
+      // Always replace from DB — never merge — to prevent duplicates
+      setHistory(dbHist);
     } finally {
       setSyncing(false);
     }
@@ -67,8 +68,13 @@ export default function App() {
     const s = plan?.weeks[wkIdx]?.sessions.find(x => x.id === sessId);
     if (s && !s.isGym) {
       const histEntry = { workout: s.name, sessionType: s.type, date: new Date().toISOString(), ...data };
-      setHistory(prev => [{ id: Date.now(), type: 'run', ...histEntry }, ...prev]);
-      if (user) await saveHistoryEntryToDB(user.id, { type: 'run', ...histEntry });
+      const tempId = Date.now();
+      setHistory(prev => [{ id: tempId, type: 'run', ...histEntry }, ...prev]);
+      if (user) {
+        const dbId = await saveHistoryEntryToDB(user.id, { type: 'run', ...histEntry });
+        // Replace temp id with real DB id so deletes work correctly
+        if (dbId) setHistory(prev => prev.map(h => h.id === tempId ? { ...h, id: dbId } : h));
+      }
     }
   }, [plan, user]);
 
@@ -83,10 +89,13 @@ export default function App() {
     setComp(prev => ({ ...prev, [key]: entry }));
     if (user) await saveCompletionToDB(user.id, wkIdx, sessId, entry);
     const s = plan?.weeks[wkIdx]?.sessions.find(x => x.id === sessId);
-    const today = new Date().toDateString();
     const histEntry = { workout: s?.name || 'Gym', sessionType: 'gym', date: new Date().toISOString(), exercises };
-    setHistory(prev => [{ id: Date.now(), type: 'gym', ...histEntry }, ...prev.filter(h => !(h.workout === s?.name && new Date(h.date).toDateString() === today))]);
-    if (user) await saveHistoryEntryToDB(user.id, { type: 'gym', ...histEntry });
+    const tempId = Date.now();
+    setHistory(prev => [{ id: tempId, type: 'gym', ...histEntry }, ...prev]);
+    if (user) {
+      const dbId = await saveHistoryEntryToDB(user.id, { type: 'gym', ...histEntry });
+      if (dbId) setHistory(prev => prev.map(h => h.id === tempId ? { ...h, id: dbId } : h));
+    }
   }, [plan, user]);
 
   const saveGymLog = useCallback(async (wkIdx, sessId, field, value) => {
@@ -116,6 +125,11 @@ export default function App() {
     setRatings(prev => ({ ...prev, [wkIdx]: rating }));
   }, []);
 
+  const deleteHistoryEntry = useCallback(async (entryId) => {
+    setHistory(prev => prev.filter(h => h.id !== entryId));
+    if (user) await deleteHistoryEntryFromDB(user.id, entryId);
+  }, [user]);
+
   if (!authChecked) return <div style={{ background: '#0A0A0A', minHeight: '100vh' }}/>;
   if (!splashDone) return <Splash plan={plan} onEnter={() => setSplashDone(true)} />;
   if (!user) return <AuthScreen onAuth={setUser} />;
@@ -124,6 +138,7 @@ export default function App() {
     <Shell
       plan={plan} completions={completions} gymLogs={gymLogs}
       history={history} setHistory={setHistory}
+      deleteHistoryEntry={deleteHistoryEntry}
       curWk={curWk} setCurWk={setCurWk}
       weekRatings={weekRatings} rateWeek={rateWeek}
       tickSession={tickSession} untickSession={untickSession}

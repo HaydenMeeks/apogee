@@ -130,7 +130,7 @@ export async function loadHistoryFromDB(userId) {
 }
 
 export async function saveHistoryEntryToDB(userId, entry) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('session_history')
     .insert({
       user_id: userId,
@@ -141,6 +141,18 @@ export async function saveHistoryEntryToDB(userId, entry) {
       dist_logged: entry.dist || null,
       notes: entry.notes || null,
       exercises: entry.exercises || null,
-    });
+    })
+    .select('id')
+    .single();
+  if (error) return null;
+  return data?.id || null;
+}
+
+export async function deleteHistoryEntryFromDB(userId, entryId) {
+  const { error } = await supabase
+    .from('session_history')
+    .delete()
+    .eq('user_id', userId)
+    .eq('id', entryId);
   return !error;
 }

@@ -1,10 +1,6 @@
 import { SESSION_TYPES } from '../utils.js';
 
-export function LogTab({ history, setHistory }) {
-  const deleteEntry = (id) => {
-    setHistory(prev => prev.filter(e => e.id !== id));
-  };
-
+export function LogTab({ history, deleteHistoryEntry }) {
   if (!history?.length) {
     return (
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', padding:32, textAlign:'center' }}>
@@ -25,7 +21,7 @@ export function LogTab({ history, setHistory }) {
         const ds = d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
         const ts = d.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' });
         return (
-          <HistoryEntry key={e.id} entry={e} tc={tc} ds={ds} ts={ts} onDelete={() => deleteEntry(e.id)}/>
+          <HistoryEntry key={e.id} entry={e} tc={tc} ds={ds} ts={ts} onDelete={() => deleteHistoryEntry(e.id)}/>
         );
       })}
     </div>

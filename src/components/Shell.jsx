@@ -21,7 +21,7 @@ const NAV = [
 ];
 
 export default function Shell(props) {
-  const { plan, completions, curWk, setCurWk, weekRatings, rateWeek, loadPlan, resetPlan, user, syncing } = props;
+  const { plan, completions, curWk, setCurWk, weekRatings, rateWeek, loadPlan, resetPlan, user, syncing, deleteHistoryEntry } = props;
   const [tab, setTab]         = useState('plan');
   const [planModal, setPlanModal] = useState(false);
   const [coachOpen, setCoachOpen] = useState(false);
@@ -87,7 +87,7 @@ export default function Shell(props) {
         <div style={{ paddingBottom: 80 }} className="tab-content">
           {tab === 'plan'     && <PlanTab     {...props} setPlanModal={setPlanModal} weekRatings={weekRatings} rateWeek={rateWeek}/>}
           {tab === 'overview' && <OverviewTab {...props}/>}
-          {tab === 'log'      && <LogTab      {...props}/>}
+          {tab === 'log'      && <LogTab      {...props} deleteHistoryEntry={deleteHistoryEntry}/>}
           {tab === 'stats'    && <StatsTab    {...props}/>}
         </div>
 
