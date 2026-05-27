@@ -53,7 +53,8 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
 
   const w = plan.weeks[curWk];
   const isCurrent = curWk === getCurWk(plan);
-  const runs = w.sessions.filter(s => !s.isGym);
+  const runs = w.sessions.filter(s => !s.isGym && s.type !== 'vest');
+  const vests = w.sessions.filter(s => s.type === 'vest');
   const gyms = w.sessions.filter(s => s.isGym);
   const nonRest = w.sessions.filter(s => s.type !== 'rest');
   const done = nonRest.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
