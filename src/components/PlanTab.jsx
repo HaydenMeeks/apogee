@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { wkRange, getCurWk, SESSION_TYPES } from '../utils.js';
 import SessionDetail from './SessionDetail.jsx';
-import WeekRating from './WeekRating.jsx';
 
-export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, tickSession, untickSession, completeWorkout, saveGymLog, setPlanModal, weekRatings, rateWeek, history, setHistory }) {
+export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, tickSession, untickSession, completeWorkout, saveGymLog, setPlanModal, history, setHistory }) {
   const [detailSession, setDetailSession] = useState(null);
   const [celebrating, setCelebrating] = useState(false);
+  const [extraLog, setExtraLog] = useState(false);
+  const [extraType, setExtraType] = useState('easy');
+  const [extraTime, setExtraTime] = useState('');
+  const [extraDist, setExtraDist] = useState('');
+  const [extraNotes, setExtraNotes] = useState('');
 
   // Fire celebration when week goes from incomplete to complete
   const prevDone = React.useRef(0);
@@ -20,10 +24,6 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
     }
     prevDone.current = done;
   }, [completions, curWk, plan]);
-  const [extraLog, setExtraLog] = useState(false);
-  const [extraType, setExtraType] = useState('easy');
-  const [extraTime, setExtraTime] = useState('');
-  const [extraNotes, setExtraNotes] = useState('');
 
   if (!plan) return (
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'70vh',padding:32,textAlign:'center'}}>
@@ -71,35 +71,48 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
     if (c?.dist) logKm += parseFloat(c.dist) || 0;
   });
   const hrsPct = tHrs > 0 ? Math.min(100, Math.round((logHrs / tHrs) * 100)) : 0;
+  const runsDone = runs.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
+  const gymsDone = gyms.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
+
+  // Run type options matching plan session types
+  const RUN_TYPES = [
+    { val: 'easy',  label: 'Easy Z2'   },
+    { val: 'long',  label: 'Long Run'  },
+    { val: 'b2b',   label: 'B2B'       },
+    { val: 'speed', label: 'Speed'     },
+    { val: 'vest',  label: 'Vest'      },
+  ];
 
   const logExtra = () => {
     if (!extraTime) return;
     const mins = parseInt(extraTime);
+    const tc = SESSION_TYPES[extraType] || SESSION_TYPES.easy;
     const entry = {
-      id: Date.now(), type: extraType === 'gym' ? 'gym' : 'run',
-      workout: extraNotes || `Extra — ${extraType}`,
-      sessionType: extraType, date: new Date().toISOString(),
+      id: Date.now(), type: 'run',
+      workout: extraNotes || `Extra — ${tc.label}`,
+      sessionType: extraType,
+      date: new Date().toISOString(),
       time: `${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')}`,
-      dist: '', notes: extraNotes,
+      dist: extraDist || '',
+      notes: extraNotes,
     };
     setHistory(prev => [entry, ...prev]);
-    setExtraLog(false); setExtraTime(''); setExtraNotes('');
+    setExtraLog(false); setExtraTime(''); setExtraDist(''); setExtraNotes('');
   };
 
   return (
-    <div style={{padding:'0 0 16px'}}>
+    <div style={{padding:'0 0 24px'}}>
       {/* Week completion celebration */}
       {celebrating&&(
-        <div style={{position:'fixed',inset:0,zIndex:999,pointerEvents:'none',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <div style={{position:'fixed',inset:0,zIndex:999,pointerEvents:'none'}}>
           <style>{`
-            @keyframes celebPop { 0%{transform:scale(0.5);opacity:0} 60%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
-            @keyframes celebFade { 0%{opacity:1} 70%{opacity:1} 100%{opacity:0} }
-            @keyframes confettiFall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
-            .celeb-wrap { animation: celebFade 3.5s forwards; }
-            .celeb-badge { animation: celebPop 0.5s cubic-bezier(.34,1.56,.64,1) forwards; }
+            @keyframes celebPop{0%{transform:scale(0.5);opacity:0}60%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+            @keyframes celebFade{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+            @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+            .celeb-wrap{animation:celebFade 3.5s forwards}
+            .celeb-badge{animation:celebPop 0.5s cubic-bezier(.34,1.56,.64,1) forwards}
           `}</style>
-          <div className="celeb-wrap" style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.7)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16}}>
-            {/* Confetti */}
+          <div className="celeb-wrap" style={{position:'absolute',inset:0,background:'rgba(0,0,0,0.75)',display:'flex',alignItems:'center',justifyContent:'center'}}>
             {Array.from({length:30},(_,i)=>(
               <div key={i} style={{position:'absolute',top:'-20px',left:`${Math.random()*100}%`,width:8,height:8,borderRadius:Math.random()>0.5?'50%':2,background:['#00C46A','#F59E0B','#3B82F6','#EF4444','#8B5CF6'][i%5],animation:`confettiFall ${1.5+Math.random()*2}s ${Math.random()*0.5}s ease-in forwards`}}/>
             ))}
@@ -112,40 +125,28 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
         </div>
       )}
 
-      {/* APOGEE header */}
-      <div style={{padding:'16px 16px 0',display:'flex',alignItems:'center',gap:10}}>
-        <svg width="20" height="21" viewBox="0 0 120 124" fill="none">
-          <path d="M 60 4 L 112 26 L 112 76 Q 112 96 60 118 Q 8 96 8 76 L 8 26 Z" stroke="rgba(244,244,242,0.3)" strokeWidth="5" fill="none"/>
-          <path d="M 60 16 L 100 34 L 100 74 Q 100 88 60 104 Q 20 88 20 74 L 20 34 Z" fill="#00C46A"/>
-          <path d="M 32 78 L 60 38 L 88 78" stroke="#0A0A0A" strokeWidth="6" strokeLinejoin="miter" strokeLinecap="square" fill="none"/>
-          <path d="M 60 38 L 88 78 L 60 78 Z" fill="#0A0A0A"/>
-        </svg>
-        <span style={{fontFamily:'Archivo Black,sans-serif',fontSize:13,letterSpacing:4,color:'rgba(244,244,242,0.5)'}}>APOGEE</span>
-        {plan&&<span style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'rgba(244,244,242,0.25)',letterSpacing:2,marginLeft:'auto'}}>GPT100 BUILD 2026</span>}
-      </div>
-
       {/* Week header */}
-      <div style={{padding:'20px 16px 14px'}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
+      <div style={{padding:'16px 16px 14px'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}>
           <div style={{display:'flex',alignItems:'center',gap:8}}>
-            <button onClick={()=>setCurWk(Math.max(0,curWk-1))} style={{width:34,height:34,borderRadius:9,background:'var(--card)',border:'1px solid var(--border)',color:'var(--text)',fontSize:18,display:'flex',alignItems:'center',justifyContent:'center'}}>‹</button>
+            <button onClick={()=>setCurWk(Math.max(0,curWk-1))} style={{width:34,height:34,borderRadius:9,background:'var(--card)',border:'1px solid var(--border)',color:'var(--text)',fontSize:18,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>‹</button>
             <span style={{fontFamily:'DM Mono,monospace',fontSize:11,color:'var(--muted)'}}>{wkRange(plan.meta.startDate,curWk)}</span>
-            <button onClick={()=>setCurWk(Math.min(plan.weeks.length-1,curWk+1))} style={{width:34,height:34,borderRadius:9,background:'var(--card)',border:'1px solid var(--border)',color:'var(--text)',fontSize:18,display:'flex',alignItems:'center',justifyContent:'center'}}>›</button>
+            <button onClick={()=>setCurWk(Math.min(plan.weeks.length-1,curWk+1))} style={{width:34,height:34,borderRadius:9,background:'var(--card)',border:'1px solid var(--border)',color:'var(--text)',fontSize:18,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>›</button>
           </div>
           <div style={{background:isCurrent?'var(--gd)':'var(--card)',border:`1px solid ${isCurrent?'var(--green)':'var(--border)'}`,borderRadius:6,padding:'3px 10px',fontFamily:'DM Mono,monospace',fontSize:9,color:isCurrent?'var(--green)':'var(--muted)',fontWeight:600,letterSpacing:1}}>
             WK {w.week}{isCurrent?' · NOW':''}
           </div>
         </div>
 
-        <div style={{fontSize:15,fontWeight:600,letterSpacing:'-.2px',marginBottom:12,color:'var(--text2)'}}>{w.phase}</div>
+        <div style={{fontSize:14,fontWeight:600,letterSpacing:'-.2px',marginBottom:12,color:'var(--text2)'}}>{w.phase}</div>
 
-        {/* KPI row */}
+        {/* KPI row — Runs, Gym, Hrs, Km */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginBottom:10}}>
           {[
-            {val:logHrs>0?logHrs.toFixed(1):(w.targets?.hrs||'—'),lbl:logHrs>0?'HRS DONE':'HRS TARGET',hit:logHrs>0},
-            {val:`${runs.filter(s=>completions[`${curWk}_${s.id}`]?.done).length}/${runs.length}`,lbl:'RUNS',hit:runs.length>0&&runs.every(s=>completions[`${curWk}_${s.id}`]?.done)},
-            {val:`${gyms.filter(s=>completions[`${curWk}_${s.id}`]?.done).length}/${gyms.length}`,lbl:'GYM',hit:gyms.length>0&&gyms.every(s=>completions[`${curWk}_${s.id}`]?.done)},
-            {val:logKm>0?logKm.toFixed(0)+'km':'—',lbl:'KM DONE',hit:logKm>0},
+            {val:`${runsDone}/${runs.length}`, lbl:'RUNS',    hit:runs.length>0&&runsDone===runs.length},
+            {val:`${gymsDone}/${gyms.length}`, lbl:'GYM',     hit:gyms.length>0&&gymsDone===gyms.length},
+            {val:logHrs>0?logHrs.toFixed(1):(w.targets?.hrs||'—'), lbl:logHrs>0?'HRS DONE':'HRS TARGET', hit:logHrs>0},
+            {val:logKm>0?logKm.toFixed(0)+'km':'—',           lbl:'KM DONE',  hit:logKm>0},
           ].map((k,i)=>(
             <div key={i} style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 10px'}}>
               <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,lineHeight:1,color:k.hit?'var(--green)':'var(--text)'}}>{k.val}</div>
@@ -191,40 +192,54 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
           ))}
         </>}
 
-        {/* Week rating */}
-        <div style={{marginTop:10}}>
-          <WeekRating wkIdx={curWk} current={weekRatings?.[curWk]} onChange={rateWeek}/>
-        </div>
-
-        {/* Log extra session */}
-        <div style={{marginTop:8}}>
-          <button onClick={()=>setExtraLog(!extraLog)} style={{width:'100%',background:'transparent',border:'1px dashed rgba(255,255,255,0.12)',borderRadius:10,padding:'10px',fontSize:12,color:'rgba(244,244,242,0.35)',cursor:'pointer',fontFamily:'DM Mono,monospace',letterSpacing:1,transition:'all .15s'}}
+        {/* Log extra run */}
+        <div style={{marginTop:12}}>
+          <button onClick={()=>setExtraLog(!extraLog)} style={{width:'100%',background:'transparent',border:'1px dashed rgba(255,255,255,0.12)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--muted)',cursor:'pointer',fontFamily:'DM Mono,monospace',letterSpacing:1,transition:'all .15s'}}
             onMouseEnter={e=>e.currentTarget.style.borderColor='rgba(0,196,106,0.3)'}
             onMouseLeave={e=>e.currentTarget.style.borderColor='rgba(255,255,255,0.12)'}>
-            + LOG EXTRA SESSION
+            + LOG EXTRA RUN
           </button>
           {extraLog&&(
             <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:14,marginTop:8}}>
-              <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:3,marginBottom:10}}>EXTRA SESSION</div>
+              <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:3,marginBottom:10}}>EXTRA RUN</div>
+
+              {/* Type selector — styled pills */}
+              <div style={{marginBottom:10}}>
+                <label style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:6}}>TYPE</label>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  {RUN_TYPES.map(t=>{
+                    const tc = SESSION_TYPES[t.val] || SESSION_TYPES.easy;
+                    const active = extraType === t.val;
+                    return(
+                      <button key={t.val} onClick={()=>setExtraType(t.val)} style={{
+                        padding:'5px 10px',borderRadius:6,fontSize:10,fontFamily:'DM Mono,monospace',fontWeight:600,cursor:'pointer',
+                        background:active?tc.bg:'transparent',
+                        color:active?tc.color:'var(--muted)',
+                        border:`1px solid ${active?tc.color:'rgba(255,255,255,0.1)'}`,
+                        transition:'all .15s',
+                      }}>{tc.label}</button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}}>
                 <div>
-                  <label style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>TYPE</label>
-                  <select value={extraType} onChange={e=>setExtraType(e.target.value)} style={{width:'100%',background:'#111',border:'1px solid rgba(255,255,255,0.1)',borderRadius:8,color:'#F4F4F2',fontSize:14,padding:'9px 10px',outline:'none'}}>
-                    {['easy','long','vest','speed','gym','other'].map(t=><option key={t} value={t}>{t.charAt(0).toUpperCase()+t.slice(1)}</option>)}
-                  </select>
+                  <label style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>DURATION (min)</label>
+                  <input type="number" value={extraTime} onChange={e=>setExtraTime(e.target.value)} placeholder="60" style={{width:'100%',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:14,padding:'9px 10px',outline:'none'}}/>
                 </div>
                 <div>
-                  <label style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>DURATION (min)</label>
-                  <input type="number" value={extraTime} onChange={e=>setExtraTime(e.target.value)} placeholder="60" style={{width:'100%',background:'#111',border:'1px solid rgba(255,255,255,0.1)',borderRadius:8,color:'#F4F4F2',fontSize:14,padding:'9px 10px',outline:'none'}}/>
+                  <label style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>KM (optional)</label>
+                  <input type="number" value={extraDist} onChange={e=>setExtraDist(e.target.value)} placeholder="—" step="0.1" style={{width:'100%',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:14,padding:'9px 10px',outline:'none'}}/>
                 </div>
               </div>
-              <div style={{marginBottom:8}}>
+              <div style={{marginBottom:10}}>
                 <label style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>NOTES</label>
-                <input type="text" value={extraNotes} onChange={e=>setExtraNotes(e.target.value)} placeholder="What did you do?" style={{width:'100%',background:'#111',border:'1px solid rgba(255,255,255,0.1)',borderRadius:8,color:'#F4F4F2',fontSize:14,padding:'9px 10px',outline:'none'}}/>
+                <input type="text" value={extraNotes} onChange={e=>setExtraNotes(e.target.value)} placeholder="How did it go?" style={{width:'100%',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontSize:14,padding:'9px 10px',outline:'none'}}/>
               </div>
               <div style={{display:'flex',gap:8}}>
-                <button onClick={()=>setExtraLog(false)} style={{flex:1,background:'transparent',border:'1px solid rgba(255,255,255,0.1)',borderRadius:9,padding:11,fontSize:13,color:'var(--muted)',cursor:'pointer'}}>Cancel</button>
-                <button onClick={logExtra} style={{flex:2,background:'var(--green)',color:'#0A0A0A',border:'none',borderRadius:9,padding:11,fontSize:14,fontWeight:700,cursor:'pointer'}}>Log Session</button>
+                <button onClick={()=>setExtraLog(false)} style={{flex:1,background:'transparent',border:'1px solid var(--border)',borderRadius:9,padding:11,fontSize:13,color:'var(--muted)',cursor:'pointer'}}>Cancel</button>
+                <button onClick={logExtra} style={{flex:2,background:'var(--green)',color:'#0A0A0A',border:'none',borderRadius:9,padding:11,fontSize:14,fontWeight:700,cursor:'pointer'}}>Log Run</button>
               </div>
             </div>
           )}
@@ -242,7 +257,7 @@ function CoachNote({ note }) {
       <button onClick={()=>setOpen(!open)} style={{width:'100%',padding:'11px 13px',display:'flex',alignItems:'flex-start',gap:8,background:'transparent',border:'none',cursor:'pointer',textAlign:'left'}}>
         <span style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--green)',letterSpacing:3,fontWeight:700,flexShrink:0,marginTop:1}}>COACH</span>
         <span style={{fontSize:13,color:'var(--text2)',lineHeight:1.6,flex:1}}>{open?note:preview+(note.length>90?'…':'')}</span>
-        <span style={{color:'var(--muted)',fontSize:12,marginTop:1,transform:open?'rotate(180deg)':'none',transition:'transform .2s',flexShrink:0}}>▾</span>
+        <span style={{color:'var(--muted)',fontSize:12,marginTop:1,flexShrink:0,transform:open?'rotate(180deg)':'none',transition:'transform .2s'}}>▾</span>
       </button>
     </div>
   );
@@ -262,10 +277,7 @@ function SessionRow({ session: s, completion, onTap }) {
       </div>
       <div style={{width:7,height:7,borderRadius:'50%',background:tc.color,flexShrink:0}}/>
       <div style={{flex:1,minWidth:0}}>
-        <div style={{fontSize:15,fontWeight:700,letterSpacing:'-.2px',color:'var(--text)',display:'flex',alignItems:'center',gap:6}}>
-          {s.name}
-          {s.isGym&&<span style={{fontSize:9,fontFamily:'DM Mono,monospace',color:'var(--gym)',background:'var(--gym-d)',padding:'2px 5px',borderRadius:4}}>GYM</span>}
-        </div>
+        <div style={{fontSize:15,fontWeight:700,letterSpacing:'-.2px',color:'var(--text)'}}>{s.name}</div>
         <div style={{fontFamily:'DM Mono,monospace',fontSize:11,color:'var(--muted)',marginTop:2}}>{s.target.split('·')[0].trim()}</div>
         {isDone&&!s.isGym&&(completion?.time||completion?.dist)&&(
           <div style={{fontFamily:'DM Mono,monospace',fontSize:11,color:'var(--green)',marginTop:2}}>
@@ -274,7 +286,7 @@ function SessionRow({ session: s, completion, onTap }) {
         )}
       </div>
       <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4,flexShrink:0}}>
-        {!s.isGym&&<span style={{fontSize:9,fontFamily:'DM Mono,monospace',background:tc.bg,color:tc.color,padding:'2px 7px',borderRadius:5,fontWeight:600}}>{tc.label}</span>}
+        <span style={{fontSize:9,fontFamily:'DM Mono,monospace',background:tc.bg,color:tc.color,padding:'2px 7px',borderRadius:5,fontWeight:600}}>{tc.label}</span>
         <span style={{color:'var(--muted)',fontSize:14}}>›</span>
       </div>
     </button>
