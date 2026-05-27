@@ -16,7 +16,7 @@
   --easy:    #3B82F6; --easy-d: rgba(59,130,246,.15);
   --speed:   #F59E0B; --speed-d: rgba(245,158,11,.15);
   --long:    #10B981; --long-d: rgba(16,185,129,.15);
-  --vest:    #00C46A; --vest-d: rgba(0,196,106,.15);
+  --vest:    #EC4899; --vest-d: rgba(236,72,153,.15);
   --b2b:     #8B5CF6; --b2b-d: rgba(139,92,246,.15);
   --race:    #EF4444; --race-d: rgba(239,68,68,.15);
   --gym:     #06B6D4; --gym-d: rgba(6,182,212,.15);
@@ -56,7 +56,7 @@ input, textarea, select { font-family: inherit; }
   --easy:    #2563EB; --easy-d: rgba(37,99,235,.12);
   --speed:   #B45309; --speed-d: rgba(180,83,9,.12);
   --long:    #059669; --long-d: rgba(5,150,105,.12);
-  --vest:    #00A858; --vest-d: rgba(0,168,88,.12);
+  --vest:    #DB2777; --vest-d: rgba(219,39,119,.12);
   --b2b:     #7C3AED; --b2b-d: rgba(124,58,237,.12);
   --race:    #DC2626; --race-d: rgba(220,38,38,.12);
   --gym:     #0891B2; --gym-d: rgba(8,145,178,.12);
