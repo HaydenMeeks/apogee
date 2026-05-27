@@ -83,7 +83,7 @@ export default function Shell(props) {
         </div>
 
         {/* Race countdowns */}
-        {races.length >= 2 && (
+        {races.length >= 1 && (
           <div style={{ padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {races.map((r, i) => (
               <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px' }}>
@@ -169,7 +169,7 @@ export default function Shell(props) {
           <ShieldIcon size={32}/>
           {syncing && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--green)', letterSpacing: 2, marginLeft: 'auto' }}>SYNCING…</div>}
         </div>
-        {races.length >= 2 && (
+        {races.length >= 1 && (
           <div style={{ padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {races.map((r, i) => (
               <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px' }}>

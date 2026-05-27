@@ -129,7 +129,7 @@ export default function OverviewTab({ plan, completions }) {
       <div style={{padding:'0 14px'}}>
 
         {/* Race countdowns — both green */}
-        {races.length>=2&&(
+        {races.length>=1&&(
           <div style={{display:'flex',gap:8,marginBottom:14}}>
             {races.map((r,i)=>(
               <div key={i} style={{flex:1,background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:'12px 13px'}}>
