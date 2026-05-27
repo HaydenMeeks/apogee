@@ -36,7 +36,7 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
     if(m2)focusParts.cue=m2[1].trim();
     if(!m1&&!m2)focusParts.rest=s.focus;
   }
-  const preview = (s.focus||'').split('\n')[0].slice(0,100);
+  const preview = (s.focus||'').split('\n')[0].slice(0,220);
 
   return (
     <>
@@ -103,24 +103,39 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
 
           {/* Title + pills */}
           <div style={{padding:'10px 18px 0',position:'relative',zIndex:1}}>
-            <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:26,lineHeight:1.1,letterSpacing:'-.5px',marginBottom:8,color:'var(--text)'}}>{s.name}</div>
+            <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:26,lineHeight:1.1,letterSpacing:'-.5px',marginBottom:8,color:'var(--text)'}}>{s.name.replace(/^OPTIONAL\s*[—-]\s*/i,'')}</div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:14}}>
               {isGym
                 ? <Pill color="#06B6D4" bg="rgba(6,182,212,.25)">GYM</Pill>
                 : <>
                     <Pill color={tc.color} bg={`${tc.color}35`}>{tc.label}</Pill>
-                    <Pill color={s.hard?'#EF4444':'var(--green)'} bg={s.hard?'rgba(239,68,68,.2)':'rgba(0,196,106,.2)'}>{s.hard?'HARD':'EASY'}</Pill>
+                    {s.hard&&<Pill color="#EF4444" bg="rgba(239,68,68,.2)">HARD</Pill>}
                   </>
               }
             </div>
           </div>
 
           {/* Stat chips row */}
-          <div style={{display:'flex',gap:8,padding:'0 16px 16px',overflowX:'auto',scrollbarWidth:'none',position:'relative',zIndex:1}}>
-            <StatChip label="DURATION" val={s.target.split('·')[0].trim()} color={tc.color}/>
-            {s.target.includes('HR')&&<StatChip label="HR CAP" val={(s.target.match(/(\d+)bpm/)||[])[1]?((s.target.match(/(\d+)bpm/)||[])[1]+'bpm'):'132bpm'} color={tc.color}/>}
-            {s.target.includes('·')&&<StatChip label="TARGET" val={s.target.split('·').slice(1).join('·').trim().slice(0,22)} color={tc.color}/>}
-          </div>
+          {(()=>{
+            // Clean duration: strip OPTIONAL prefix, strip trailing " easy"
+            const rawDur = s.target.split('·')[0].trim()
+              .replace(/^OPTIONAL\s*[—-]\s*/i,'')
+              .replace(/\s*easy$/i,'')
+              .trim();
+            // HR cap from target
+            const hrMatch = s.target.match(/(\d+)bpm/);
+            const hrCap = hrMatch ? hrMatch[1]+'bpm' : null;
+            // Secondary target: first non-duration, non-HR-cap segment
+            const segments = s.target.split('·').slice(1).map(x=>x.trim()).filter(x=>x && !x.match(/^HR cap/i) && !x.match(/^\d+bpm/));
+            const secondTarget = segments[0]?.slice(0,28) || null;
+            return (
+              <div style={{display:'flex',gap:8,padding:'0 16px 16px',overflowX:'auto',scrollbarWidth:'none',position:'relative',zIndex:1}}>
+                <StatChip label="DURATION" val={rawDur} color={tc.color}/>
+                {hrCap&&<StatChip label="HR CAP" val={hrCap} color={tc.color}/>}
+                {secondTarget&&!secondTarget.match(/bpm/)&&<StatChip label="TARGET" val={secondTarget} color={tc.color}/>}
+              </div>
+            );
+          })()}
         </div>
 
         {/* ── SCROLLABLE BODY ── */}
