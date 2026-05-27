@@ -29,10 +29,33 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
   const timerRef = useRef(null);
 
   // ── REST TIMER ──────────────────────────────────────────────────────────────
+  function playBeep(freq = 880, duration = 0.15, vol = 0.3) {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + duration);
+    } catch(e) {}
+  }
+
   useEffect(() => {
     if (restActive && restTimer > 0) {
+      // Beep at 3 seconds remaining
+      if (restTimer === 3) playBeep(660, 0.1, 0.2);
+      if (restTimer === 2) playBeep(660, 0.1, 0.2);
+      if (restTimer === 1) playBeep(660, 0.1, 0.2);
       timerRef.current = setTimeout(() => setRestTimer(t => t - 1), 1000);
     } else if (restActive && restTimer === 0) {
+      // Three ascending beeps on completion
+      playBeep(660, 0.12, 0.3);
+      setTimeout(() => playBeep(770, 0.12, 0.3), 150);
+      setTimeout(() => playBeep(880, 0.2, 0.4), 300);
       setRestActive(false);
     }
     return () => clearTimeout(timerRef.current);
