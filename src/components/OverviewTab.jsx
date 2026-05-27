@@ -2,18 +2,14 @@ import { useState } from 'react';
 import { getCurWk, daysTo } from '../utils.js';
 import Heatmap from './Heatmap.jsx';
 
-const S = {
-  card:'#1E1E1E', border:'rgba(255,255,255,0.1)',
-  text:'#F4F4F2', text2:'rgba(244,244,242,0.75)', muted:'rgba(244,244,242,0.4)',
-  green:'#00C46A', g2:'#00A858',
-};
+// CSS variables used throughout
 
 export default function OverviewTab({ plan, completions }) {
   const [hovWk, setHovWk] = useState(null);
 
   if (!plan) return (
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'60vh',padding:32,textAlign:'center'}}>
-      <div style={{fontSize:14,color:S.muted,lineHeight:1.7}}>Load a plan to see the overview.</div>
+      <div style={{fontSize:14,color:'var(--muted)',lineHeight:1.7}}>Load a plan to see the overview.</div>
     </div>
   );
 
@@ -83,14 +79,14 @@ export default function OverviewTab({ plan, completions }) {
   let grid='';
   [0,50,100,150].filter(k=>k<=maxKm*1.08).forEach(km=>{
     const gy=sy(km);
-    grid+=`<line x1="${PAD.l}" y1="${gy}" x2="${PAD.l+CW}" y2="${gy}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
-    grid+=`<text x="${PAD.l-4}" y="${gy+4}" text-anchor="end" font-family="DM Mono,monospace" font-size="9" fill="rgba(244,244,242,0.3)">${km}</text>`;
+    grid+=`<line x1="${PAD.l}" y1="${gy}" x2="${PAD.l+CW}" y2="${gy}" stroke="var(--border)" stroke-width="1"/>`;
+    grid+=`<text x="${PAD.l-4}" y="${gy+4}" text-anchor="end" font-family="DM Mono,monospace" font-size="9" fill="var(--muted)">${km}</text>`;
   });
 
   let xlabels='';
   wkData.forEach((d,i)=>{
     if(i%4===0||d.hasRace)xlabels+=`<text x="${sx(i)}" y="${PAD.t+CH+14}" text-anchor="middle" font-family="DM Mono,monospace" font-size="8.5" fill="rgba(244,244,242,${d.hasRace?'0.6':'0.25'})">${d.date}</text>`;
-    xlabels+=`<text x="${sx(i)}" y="${PAD.t+CH+26}" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(244,244,242,0.14)">${d.wk}</text>`;
+    xlabels+=`<text x="${sx(i)}" y="${PAD.t+CH+26}" text-anchor="middle" font-family="DM Mono,monospace" font-size="7.5" fill="var(--muted)">${d.wk}</text>`;
   });
 
   let rlines='';
@@ -136,10 +132,10 @@ export default function OverviewTab({ plan, completions }) {
         {races.length>=2&&(
           <div style={{display:'flex',gap:8,marginBottom:14}}>
             {races.map((r,i)=>(
-              <div key={i} style={{flex:1,background:S.card,border:`1px solid ${S.border}`,borderRadius:12,padding:'12px 13px'}}>
+              <div key={i} style={{flex:1,background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:'12px 13px'}}>
                 <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:28,color:'#00C46A',lineHeight:1}}>{daysTo(r.date)}</div>
-                <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:S.muted,letterSpacing:1,marginTop:2}}>DAYS TO GO</div>
-                <div style={{fontSize:13,fontWeight:600,color:S.text,marginTop:4}}>{r.name}</div>
+                <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:1,marginTop:2}}>DAYS TO GO</div>
+                <div style={{fontSize:13,fontWeight:600,color:'var(--text)',marginTop:4}}>{r.name}</div>
                 {r.goal&&<div style={{fontFamily:'DM Mono,monospace',fontSize:10,color:'#00C46A',marginTop:2}}>{r.goal}</div>}
               </div>
             ))}
@@ -149,9 +145,9 @@ export default function OverviewTab({ plan, completions }) {
         {/* Block stats */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:14}}>
           {[[plan.weeks.length,'WEEKS'],[Math.round(totalHrs),'HRS PLANNED'],[`${doneS}/${totalS}`,'SESSIONS']].map(([v,l],i)=>(
-            <div key={i} style={{background:S.card,border:`1px solid ${S.border}`,borderRadius:11,padding:'11px 12px'}}>
+            <div key={i} style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:11,padding:'11px 12px'}}>
               <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:24,color:'#00C46A',lineHeight:1}}>{v}</div>
-              <div style={{fontFamily:'DM Mono,monospace',fontSize:8,color:S.muted,letterSpacing:.5,marginTop:3}}>{l}</div>
+              <div style={{fontFamily:'DM Mono,monospace',fontSize:8,color:'var(--muted)',letterSpacing:.5,marginTop:3}}>{l}</div>
             </div>
           ))}
         </div>
@@ -162,7 +158,7 @@ export default function OverviewTab({ plan, completions }) {
 
         {/* Volume chart — SVG line graph */}
         <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'#00C46A',letterSpacing:3,fontWeight:700,marginBottom:8}}>WEEKLY VOLUME</div>
-        <div style={{background:S.card,border:`1px solid ${S.border}`,borderRadius:12,overflow:'hidden',position:'relative',marginBottom:14}}>
+        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,overflow:'hidden',position:'relative',marginBottom:14}}>
           <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
             <div style={{minWidth:520}} onMouseLeave={()=>setHovWk(null)}>
               <svg viewBox={`0 0 ${W} ${H}`} style={{width:'100%',display:'block'}}
@@ -189,22 +185,22 @@ export default function OverviewTab({ plan, completions }) {
           </div>
           {/* Tooltip */}
           {hd&&(
-            <div style={{position:'absolute',top:8,right:12,background:'rgba(10,10,10,0.95)',border:'1.5px solid rgba(0,196,106,0.35)',borderRadius:10,padding:'10px 14px',pointerEvents:'none',minWidth:160}}>
+            <div style={{position:'absolute',top:8,right:12,background:'var(--surface)',border:'1.5px solid rgba(0,196,106,0.35)',borderRadius:10,padding:'10px 14px',pointerEvents:'none',minWidth:160}}>
               <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'#00C46A',letterSpacing:2,marginBottom:3}}>WK {hd.wk} · {hd.date}</div>
-              <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,color:S.text,lineHeight:1}}>{hd.km}<span style={{fontFamily:'DM Mono,monospace',fontSize:11,color:S.muted,marginLeft:4}}>km</span></div>
-              <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:S.muted,marginTop:4,letterSpacing:1}}>{hd.phase.split('·').pop().trim().toUpperCase().substring(0,22)}</div>
+              <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,color:'var(--text)',lineHeight:1}}>{hd.km}<span style={{fontFamily:'DM Mono,monospace',fontSize:11,color:'var(--muted)',marginLeft:4}}>km</span></div>
+              <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',marginTop:4,letterSpacing:1}}>{hd.phase.split('·').pop().trim().toUpperCase().substring(0,22)}</div>
               {hd.hasRace&&<div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'#EF4444',marginTop:4,fontWeight:700}}>RACE WEEK</div>}
               {hd.hasAet&&<div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'#00C46A',marginTop:4,fontWeight:700}}>AeT RETEST</div>}
             </div>
           )}
           {/* Legend */}
-          <div style={{display:'flex',gap:14,padding:'8px 14px',borderTop:`1px solid ${S.border}`,flexWrap:'wrap'}}>
+          <div style={{display:'flex',gap:14,padding:'8px 14px',borderTop:`1px solid ${'var(--border)'}`,flexWrap:'wrap'}}>
             {[['#00C46A','Line'],['#EF4444','Race'],['rgba(0,196,106,1)','AeT test']].map(([c,l])=>(
               <div key={l} style={{display:'flex',alignItems:'center',gap:5}}>
                 {l==='AeT test'?<svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill={c}/></svg>
                   :l==='Race'?<svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,0 10,5 5,10 0,5" fill={c}/></svg>
                   :<div style={{width:14,height:2,background:c,borderRadius:1}}/>}
-                <span style={{fontFamily:'DM Mono,monospace',fontSize:8,color:S.muted,letterSpacing:1}}>{l.toUpperCase()}</span>
+                <span style={{fontFamily:'DM Mono,monospace',fontSize:8,color:'var(--muted)',letterSpacing:1}}>{l.toUpperCase()}</span>
               </div>
             ))}
           </div>
@@ -213,18 +209,18 @@ export default function OverviewTab({ plan, completions }) {
         {/* AeT retest schedule */}
         {plan.meta.aet_retest_schedule&&<>
           <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'#00C46A',letterSpacing:3,fontWeight:700,marginBottom:8}}>AeT RETEST SCHEDULE</div>
-          <div style={{background:S.card,border:`1px solid ${S.border}`,borderRadius:12,overflow:'hidden',marginBottom:14}}>
+          <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,overflow:'hidden',marginBottom:14}}>
             {plan.meta.aet_retest_schedule.map((t,i,arr)=>{
               const ws=new Date(start.getTime()+(t.week-1)*7*86400000);
               const isPast=ws<new Date();
               return(
-                <div key={i} style={{display:'flex',alignItems:'center',gap:11,padding:'11px 14px',borderBottom:i<arr.length-1?`1px solid ${S.border}`:'none'}}>
-                  <div style={{width:8,height:8,borderRadius:'50%',background:isPast?S.border:S.green,flexShrink:0}}/>
+                <div key={i} style={{display:'flex',alignItems:'center',gap:11,padding:'11px 14px',borderBottom:i<arr.length-1?`1px solid ${'var(--border)'}`:'none'}}>
+                  <div style={{width:8,height:8,borderRadius:'50%',background:isPast?'var(--border)':'var(--green)',flexShrink:0}}/>
                   <div style={{flex:1}}>
                     <div style={{fontSize:14,fontWeight:600}}>Week {t.week} · {ws.toLocaleDateString('en-AU',{day:'numeric',month:'short'})}</div>
-                    <div style={{fontFamily:'DM Mono,monospace',fontSize:10,color:S.muted,marginTop:1}}>{t.note}</div>
+                    <div style={{fontFamily:'DM Mono,monospace',fontSize:10,color:'var(--muted)',marginTop:1}}>{t.note}</div>
                   </div>
-                  <span style={{fontFamily:'DM Mono,monospace',fontSize:9,color:isPast?S.muted:S.green,letterSpacing:1}}>{isPast?'DONE':'UPCOMING'}</span>
+                  <span style={{fontFamily:'DM Mono,monospace',fontSize:9,color:isPast?'var(--muted)':'var(--green)',letterSpacing:1}}>{isPast?'DONE':'UPCOMING'}</span>
                 </div>
               );
             })}
@@ -233,11 +229,11 @@ export default function OverviewTab({ plan, completions }) {
 
         {/* Phase breakdown */}
         <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'#00C46A',letterSpacing:3,fontWeight:700,marginBottom:8}}>PHASE BREAKDOWN</div>
-        <div style={{background:S.card,border:`1px solid ${S.border}`,borderRadius:12,overflow:'hidden'}}>
+        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,overflow:'hidden'}}>
           {Object.entries(phases).map(([ph,stats],i,arr)=>(
-            <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 14px',borderBottom:i<arr.length-1?`1px solid ${S.border}`:'none'}}>
+            <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'11px 14px',borderBottom:i<arr.length-1?`1px solid ${'var(--border)'}`:'none'}}>
               <div style={{fontSize:14,fontWeight:600}}>{ph}</div>
-              <div style={{fontFamily:'DM Mono,monospace',fontSize:10,color:S.muted,letterSpacing:1}}>{stats.weeks} WKS · {Math.round(stats.hrs)}HRS</div>
+              <div style={{fontFamily:'DM Mono,monospace',fontSize:10,color:'var(--muted)',letterSpacing:1}}>{stats.weeks} WKS · {Math.round(stats.hrs)}HRS</div>
             </div>
           ))}
         </div>
