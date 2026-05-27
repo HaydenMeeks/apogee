@@ -39,3 +39,25 @@ input, textarea, select { font-family: inherit; }
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+[data-theme="light"] {
+  --bg:      #F0F0ED;
+  --surface: #E8E8E4;
+  --card:    #FFFFFF;
+  --card2:   #F5F5F2;
+  --border:  rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --text:    #141412;
+  --text2:   rgba(20,20,18,0.75);
+  --muted:   rgba(20,20,18,0.4);
+  --green:   #00A858;
+  --g2:      #008A47;
+  --gd:      rgba(0,168,88,0.12);
+  --easy:    #2563EB; --easy-d: rgba(37,99,235,.12);
+  --speed:   #D97706; --speed-d: rgba(217,119,6,.12);
+  --long:    #059669; --long-d: rgba(5,150,105,.12);
+  --vest:    #00A858; --vest-d: rgba(0,168,88,.12);
+  --b2b:     #7C3AED; --b2b-d: rgba(124,58,237,.12);
+  --race:    #DC2626; --race-d: rgba(220,38,38,.12);
+  --gym:     #0891B2; --gym-d: rgba(8,145,178,.12);
+}
