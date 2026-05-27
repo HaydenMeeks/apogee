@@ -3,58 +3,6 @@ import { askClaude } from '../claude.js';
 
 const S = {
   bg: '#0A0A0A', surface: '#141414', card: '#1C1C1C',
-  border: 'rgba(255,255,255,0.08)', border2: 'rgba(255,255,255,0.14)',
-  text: '#F4F4F2', text2: 'rgba(244,244,242,0.7)', muted: 'rgba(244,244,242,0.35)',
-  green: '#00C46A', g2: '#00A858',
-};
-
-const QUICK_PROMPTS = [
-  "I'm on a road trip next week — no gym access",
-  "I'm feeling fatigued, should I reduce volume?",
-  "What should I focus on this week?",
-  "I missed yesterday's run — what should I do?",
-  "Can you explain why this week's sessions are structured this way?",
-];
-
-export default function CoachChat({ plan, completions, weekRatings, onClose }) {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: `Week ${plan ? Math.floor((new Date() - new Date(plan.meta.startDate)) / (7 * 86400000)) + 1 : 1} of your block. What do you need?` }
-  ]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const bottomRef = useRef(null);
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const send = async (text) => {
-    const msg = text || input.trim();
-    if (!msg || loading) return;
-    setInput('');
-    const newMessages = [...messages, { role: 'user', content: msg }];
-    setMessages(newMessages);
-    setLoading(true);
-    try {
-      const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
-      const reply = await askClaude(apiMessages, plan, completions, weekRatings);
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Connection issue. Try again.' }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, padding: '10px 16px', paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))' }}>
-        <div>
-          <div style={{ fontSize: 16, fontWeight: 700 }}>Coach</div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: S.muted, letterSpacing: 2, marginTop: 1 }}>POWERED BY CLAUDE</div>
-        </div>
         <button onClick={onClose} style={{ width: 44, height: 44, borderRadius: '50%', background: S.card, border: `1px solid ${S.border}`, color: S.text, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>✕</button>
       </div>
 
