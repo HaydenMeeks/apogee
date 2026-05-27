@@ -109,7 +109,7 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
                 ? <Pill color="#06B6D4" bg="rgba(6,182,212,.25)">GYM</Pill>
                 : <>
                     <Pill color={tc.color} bg={`${tc.color}35`}>{tc.label}</Pill>
-                    {s.hard&&<Pill color="#EF4444" bg="rgba(239,68,68,.2)">HARD</Pill>}
+                    {s.hard&&s.type!=='speed'&&s.type!=='vest'&&<Pill color="#EF4444" bg="rgba(239,68,68,.2)">HARD</Pill>}
                   </>
               }
             </div>
