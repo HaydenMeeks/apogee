@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { SESSION_TYPES } from '../utils.js';
 import WorkoutModal from './WorkoutModal.jsx';
 
-export default function SessionDetail({ session:s, wkIdx, plan, completion, gymLog, onBack, onTick, onUntick, onCompleteWorkout, onSaveGymLog }) {
+export default function SessionDetail({ session:s, wkIdx, plan, completion, gymLog, onBack, onTick, onUntick, onCompleteWorkout, onSaveGymLog, user }) {
   const [noteOpen, setNoteOpen] = useState(false);
   const [timeVal, setTimeVal] = useState('');
   const [distVal, setDistVal] = useState('');
@@ -225,7 +225,7 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
       </div>
 
       {workoutOpen&&s.gymSession&&(
-        <WorkoutModal session={s} wkIdx={wkIdx} gymLog={gymLog} onClose={()=>setWorkoutOpen(false)} onComplete={handleGymComplete} onSaveLog={onSaveGymLog}/>
+        <WorkoutModal session={s} wkIdx={wkIdx} gymLog={gymLog} onClose={()=>setWorkoutOpen(false)} onComplete={handleGymComplete} onSaveLog={onSaveGymLog} user={user}/>
       )}
     </>
   );
