@@ -180,6 +180,12 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
             <SessionRow key={s.id} session={s} completion={completions[`${curWk}_${s.id}`]} onTap={()=>setDetailSession({session:s,wkIdx:curWk})}/>
           ))}
         </>}
+        {vests.length>0&&<>
+          <SectionLabel>Vest ({vests.length})</SectionLabel>
+          {vests.map(s=>(
+            <SessionRow key={s.id} session={s} completion={completions[`${curWk}_${s.id}`]} onTap={()=>setDetailSession({session:s,wkIdx:curWk})}/>
+          ))}
+        </>}
         {gyms.length>0&&<>
           <SectionLabel>Gym ({gyms.length})</SectionLabel>
           {gyms.map(s=>(
