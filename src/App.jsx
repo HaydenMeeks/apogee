@@ -18,6 +18,14 @@ export default function App() {
   const [history, setHistory]   = useState(() => DB.get('apogee_hist', []));
   const [weekRatings, setRatings] = useState(() => DB.get('apogee_ratings', {}));
   const [curWk, setCurWk]       = useState(() => getCurWk(DB.get('apogee_plan', BAKED_PLAN)));
+  const [theme, setTheme] = useState(() => localStorage.getItem('apogee_theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('apogee_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => setTheme(t => t === 'dark' ? 'light' : 'dark'), []);
 
   // Persist locally
   useEffect(() => { DB.set('apogee_plan', plan); }, [plan]);
@@ -145,6 +153,7 @@ export default function App() {
       completeWorkout={completeWorkout} saveGymLog={saveGymLog}
       loadPlan={loadPlan} resetPlan={() => loadPlan(BAKED_PLAN)}
       user={user} syncing={syncing}
+      theme={theme} toggleTheme={toggleTheme}
     />
   );
 }
