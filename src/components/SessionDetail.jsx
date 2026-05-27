@@ -48,8 +48,32 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
 
   return (
     <>
+      <style>{`
+        .session-detail-wrap {
+          position: fixed;
+          top: 0; bottom: 0; right: 0; left: 0;
+          background: #0A0A0A;
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+        }
+        @media (min-width: 768px) {
+          .session-detail-wrap { left: 260px; }
+        }
+        .session-cta {
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          padding: 12px 16px;
+          padding-bottom: calc(12px + env(safe-area-inset-bottom, 20px));
+          background: rgba(10,10,10,0.97);
+          border-top: 1px solid rgba(255,255,255,0.1);
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+        }
+      `}</style>
       {/* Full screen layout — fixed, no scroll issues */}
-      <div style={{position:'fixed',inset:0,background:S.bg,zIndex:10,display:'flex',flexDirection:'column',overflow:'hidden'}}>
+      <div className="session-detail-wrap">
 
         {/* Hero */}
         <div style={{background:tc.bg,borderBottom:`1px solid ${tc.color}22`,flexShrink:0}}>
@@ -139,18 +163,7 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
         </div>
 
         {/* Sticky CTA — above Safari bar */}
-        <div style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          padding: '12px 16px',
-          paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 20px))',
-          background: 'rgba(10,10,10,0.97)',
-          borderTop: `1px solid ${S.border}`,
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-        }}>
+        <div className="session-cta">
           {isGym&&!isDone&&(
             <button onClick={()=>setWorkoutOpen(true)} style={{width:'100%',background:S.green,color:'#0A0A0A',border:'none',borderRadius:13,padding:17,fontSize:16,fontWeight:800,cursor:'pointer',letterSpacing:.3}}>
               Begin Workout

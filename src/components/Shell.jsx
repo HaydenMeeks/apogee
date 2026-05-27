@@ -44,10 +44,11 @@ export default function Shell(props) {
         {races.length >= 2 && (
           <div style={{ padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {races.map((r, i) => (
-              <div key={i} style={{ background: S.card, border: `1px solid ${S.border}`, borderRadius: 8, padding: '9px 12px', borderLeft: `2px solid ${i === 0 ? '#3B82F6' : '#EF4444'}` }}>
-                <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 22, color: i === 0 ? '#3B82F6' : '#EF4444', lineHeight: 1 }}>{daysTo(r.date)}</div>
+              <div key={i} style={{ background: S.card, border: `1px solid ${S.border}`, borderRadius: 8, padding: '9px 12px', borderLeft: `2px solid ${S.green}`, position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,#00C46A,transparent)' }}/>
+                <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 22, color: S.green, lineHeight: 1 }}>{daysTo(r.date)}</div>
                 <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: S.muted, letterSpacing: 1, marginTop: 2 }}>{r.name}</div>
-                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: i === 0 ? '#3B82F6' : '#EF4444', marginTop: 1 }}>{r.goal}</div>}
+                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: S.green, marginTop: 1 }}>{r.goal}</div>}
               </div>
             ))}
           </div>
