@@ -86,11 +86,11 @@ export default function Shell(props) {
         {races.length >= 2 && (
           <div style={{ padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {races.map((r, i) => (
-              <div key={i} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '9px 12px', borderLeft: '2px solid var(--green)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,var(--green),transparent)' }}/>
-                <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 22, color: 'var(--green)', lineHeight: 1 }}>{daysTo(r.date)}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--muted)', letterSpacing: 1, marginTop: 2 }}>{r.name}</div>
-                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', marginTop: 1 }}>{r.goal}</div>}
+              <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px' }}>
+                <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 24, color: 'var(--green)', lineHeight: 1 }}>{daysTo(r.date)}</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--muted)', letterSpacing: 1, marginTop: 1 }}>DAYS TO GO</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>{r.name.split('·')[0].trim()}</div>
+                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', marginTop: 2 }}>{r.goal}</div>}
               </div>
             ))}
           </div>
@@ -126,15 +126,24 @@ export default function Shell(props) {
         {/* Bottom — settings */}
         <div style={{ padding: '12px 12px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {syncing && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', letterSpacing: 2, padding: '4px 14px' }}>SYNCING…</div>}
-          <button onClick={toggleTheme} style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 14px', borderRadius: 9,
-            background: 'var(--card)', border: '1px solid rgba(255,255,255,0.08)',
-            color: 'var(--text)', fontSize: 13, fontWeight: 500, cursor: 'pointer', width: '100%',
-          }}>
-            <span style={{ fontSize: 16 }}>{theme === 'dark' ? '☀️' : '🌙'}</span>
-            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-          </button>
+          <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
+              {theme === 'dark' ? '🌙  DARK' : '☀️  LIGHT'}
+            </span>
+            <button onClick={toggleTheme} style={{
+              width: 48, height: 26, borderRadius: 13, border: 'none', cursor: 'pointer',
+              background: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'var(--green)',
+              position: 'relative', transition: 'background .25s', flexShrink: 0,
+            }}>
+              <div style={{
+                position: 'absolute', top: 3, width: 20, height: 20, borderRadius: '50%',
+                background: theme === 'dark' ? 'rgba(255,255,255,0.6)' : '#fff',
+                left: theme === 'dark' ? 3 : 25,
+                transition: 'left .25s',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+              }}/>
+            </button>
+          </div>
           <button onClick={() => { setPlanModal(true); closeDrawer(); }} style={{
             padding: '10px 14px', borderRadius: 9,
             background: 'var(--card)', border: '1px solid rgba(255,255,255,0.08)',
@@ -163,11 +172,11 @@ export default function Shell(props) {
         {races.length >= 2 && (
           <div style={{ padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {races.map((r, i) => (
-              <div key={i} style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: '9px 12px', borderLeft: '2px solid var(--green)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,var(--green),transparent)' }}/>
-                <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 22, color: 'var(--green)', lineHeight: 1 }}>{daysTo(r.date)}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--muted)', letterSpacing: 1, marginTop: 2 }}>{r.name}</div>
-                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', marginTop: 1 }}>{r.goal}</div>}
+              <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px' }}>
+                <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 24, color: 'var(--green)', lineHeight: 1 }}>{daysTo(r.date)}</div>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--muted)', letterSpacing: 1, marginTop: 1 }}>DAYS TO GO</div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>{r.name.split('·')[0].trim()}</div>
+                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', marginTop: 2 }}>{r.goal}</div>}
               </div>
             ))}
           </div>
@@ -183,10 +192,24 @@ export default function Shell(props) {
           </button>
         </nav>
         <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <button onClick={toggleTheme} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'var(--card)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text)', fontSize: 12, padding: '8px 12px', borderRadius: 8, cursor: 'pointer' }}>
-            <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
-            <span style={{ fontFamily: 'DM Mono, monospace', letterSpacing: 1 }}>{theme === 'dark' ? 'LIGHT MODE' : 'DARK MODE'}</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px' }}>
+            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
+              {theme === 'dark' ? '🌙  DARK' : '☀️  LIGHT'}
+            </span>
+            <button onClick={toggleTheme} style={{
+              width: 48, height: 26, borderRadius: 13, border: 'none', cursor: 'pointer',
+              background: theme === 'dark' ? 'rgba(255,255,255,0.12)' : 'var(--green)',
+              position: 'relative', transition: 'background .25s', flexShrink: 0,
+            }}>
+              <div style={{
+                position: 'absolute', top: 3, width: 20, height: 20, borderRadius: '50%',
+                background: theme === 'dark' ? 'rgba(255,255,255,0.6)' : '#fff',
+                left: theme === 'dark' ? 3 : 25,
+                transition: 'left .25s',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+              }}/>
+            </button>
+          </div>
           <button onClick={() => setPlanModal(true)} style={{ width: '100%', background: 'var(--card)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(244,244,242,0.6)', fontSize: 10, fontWeight: 600, padding: '9px 12px', borderRadius: 8, fontFamily: 'DM Mono, monospace', letterSpacing: 1, cursor: 'pointer' }}>
             MANAGE PLAN
           </button>
