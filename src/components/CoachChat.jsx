@@ -16,18 +16,6 @@ const QUICK_PROMPTS = [
   "Can you explain why this week's sessions are structured this way?",
 ];
 
-// Renders **bold**, *italic*, and `code` from Claude responses
-function renderMarkdown(text) {
-  if (!text) return '';
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/__(.*?)__/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/_(.*?)_/g, '<em>$1</em>')
-    .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:4px;font-family:DM Mono,monospace;font-size:12px">$1</code>')
-    .replace(/\n/g, '<br />');
-}
-
 export default function CoachChat({ plan, completions, weekRatings, onClose }) {
   const [messages, setMessages] = useState([
     { role: 'assistant', content: `Week ${plan ? Math.floor((new Date() - new Date(plan.meta.startDate)) / (7 * 86400000)) + 1 : 1} of your block. What do you need?` }
@@ -60,14 +48,14 @@ export default function CoachChat({ plan, completions, weekRatings, onClose }) {
   };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: S.bg, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <div style={{ padding: '16px 16px 14px', borderBottom: `1px solid ${S.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+      <div style={{ padding: '16px 16px 14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 700 }}>Coach</div>
           <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: S.muted, letterSpacing: 2, marginTop: 1 }}>POWERED BY CLAUDE</div>
         </div>
-        <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: '50%', background: S.card, border: `1px solid ${S.border}`, color: S.muted, fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>✕</button>
+        <button onClick={onClose} style={{ width: 44, height: 44, borderRadius: '50%', background: S.card, border: `1px solid ${S.border}`, color: S.text, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>✕</button>
       </div>
 
       {/* Messages */}
@@ -76,16 +64,12 @@ export default function CoachChat({ plan, completions, weekRatings, onClose }) {
           <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <div style={{
               maxWidth: '85%', padding: '10px 13px', borderRadius: m.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-              background: m.role === 'user' ? S.green : S.card,
-              color: m.role === 'user' ? '#0A0A0A' : S.text,
+              background: m.role === 'user' ? 'var(--green)' : 'var(--card)',
+              color: m.role === 'user' ? '#0A0A0A' : 'var(--text)',
               fontSize: 14, lineHeight: 1.6,
-              border: m.role === 'assistant' ? `1px solid ${S.border}` : 'none',
+              border: m.role === 'assistant' ? '1px solid var(--border)' : 'none',
             }}>
-              {m.role === 'assistant' ? (
-                <span dangerouslySetInnerHTML={{ __html: renderMarkdown(m.content) }} />
-              ) : (
-                m.content
-              )}
+              {m.content}
             </div>
           </div>
         ))}
@@ -120,16 +104,29 @@ export default function CoachChat({ plan, completions, weekRatings, onClose }) {
       )}
 
       {/* Input */}
-      <div style={{ padding: '10px 14px', paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))', borderTop: `1px solid ${S.border}`, flexShrink: 0, display: 'flex', gap: 8 }}>
-        <input
+      <div style={{ padding: '10px 14px calc(10px + env(safe-area-inset-bottom, 0px))', borderTop: `1px solid ${S.border}`, flexShrink: 0, display: 'flex', gap: 8 }}>
+        <textarea
           ref={inputRef}
           value={input}
           onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
+          onKeyDown={e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())}
           placeholder="Ask your coach anything…"
-          style={{ flex: 1, background: S.card, border: `1px solid ${S.border2}`, borderRadius: 24, color: S.text, fontSize: 14, padding: '10px 16px', outline: 'none', fontFamily: 'DM Sans, sans-serif' }}
+          rows={1}
+          style={{
+            flex: 1, background: 'var(--card)', border: '1px solid var(--border2)',
+            borderRadius: 16, color: S.text, fontSize: 14,
+            padding: '10px 16px', outline: 'none',
+            fontFamily: 'DM Sans, sans-serif',
+            resize: 'none', overflow: 'hidden',
+            minHeight: 44, maxHeight: 120,
+            lineHeight: '1.5',
+          }}
           onFocus={e => e.target.style.borderColor = S.green}
           onBlur={e => e.target.style.borderColor = S.border2}
+          onInput={e => {
+            e.target.style.height = 'auto';
+            e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+          }}
         />
         <button onClick={() => send()} disabled={!input.trim() || loading} style={{ width: 44, height: 44, borderRadius: '50%', background: input.trim() && !loading ? S.green : S.card, border: 'none', color: input.trim() && !loading ? '#0A0A0A' : S.muted, fontSize: 18, cursor: input.trim() && !loading ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .2s', flexShrink: 0 }}>
           ↑
