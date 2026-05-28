@@ -127,9 +127,9 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
             <button onClick={()=>setCurWk(Math.max(0,curWk-1))} style={{width:34,height:34,borderRadius:9,background:'var(--card)',border:'1px solid var(--border)',color:'var(--text)',fontSize:18,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>‹</button>
             <span style={{fontFamily:'DM Mono,monospace',fontSize:11,color:'var(--muted)'}}>{wkRange(plan.meta.startDate,curWk)}</span>
             <button onClick={()=>setCurWk(Math.min(plan.weeks.length-1,curWk+1))} style={{width:34,height:34,borderRadius:9,background:'var(--card)',border:'1px solid var(--border)',color:'var(--text)',fontSize:18,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}>›</button>
-            {!isCurrent&&<button onClick={()=>setCurWk(getCurWk(plan))} style={{height:28,padding:'0 10px',borderRadius:7,background:'var(--gd)',border:'1px solid var(--green)',color:'var(--green)',fontSize:10,fontFamily:'DM Mono,monospace',fontWeight:700,letterSpacing:1,cursor:'pointer'}}>NOW</button>}
+            {!isCurrent&&<button onClick={()=>setCurWk(getCurWk(plan))} style={{height:34,padding:'0 12px',borderRadius:9,background:'var(--gd)',border:'1px solid var(--green)',color:'var(--green)',fontSize:10,fontFamily:'DM Mono,monospace',fontWeight:700,letterSpacing:1,cursor:'pointer'}}>NOW</button>}
           </div>
-          <div style={{background:isCurrent?'var(--gd)':'var(--card)',border:`1px solid ${isCurrent?'var(--green)':'var(--border)'}`,borderRadius:6,padding:'3px 10px',fontFamily:'DM Mono,monospace',fontSize:9,color:isCurrent?'var(--green)':'var(--muted)',fontWeight:600,letterSpacing:1}}>
+          <div style={{height:34,display:'flex',alignItems:'center',padding:'0 12px',background:isCurrent?'var(--gd)':'var(--card)',border:`1px solid ${isCurrent?'var(--green)':'var(--border)'}`,borderRadius:9,fontFamily:'DM Mono,monospace',fontSize:10,color:isCurrent?'var(--green)':'var(--muted)',fontWeight:700,letterSpacing:1}}>
             WK {w.week}{isCurrent?' · NOW':''}
           </div>
         </div>
