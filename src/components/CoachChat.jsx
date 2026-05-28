@@ -62,7 +62,7 @@ Be direct, specific, and concise. No fluff. Answer like a coach texting an athle
       }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>Coach</div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--muted)', letterSpacing: 2, marginTop: 1 }}>POWERED BY CLAUDE</div>
+          <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 2, marginTop: 1 }}>POWERED BY CLAUDE</div>
         </div>
         <button onClick={onClose} style={{
           width: 44, height: 44, borderRadius: '50%',
@@ -94,7 +94,7 @@ Be direct, specific, and concise. No fluff. Answer like a coach texting an athle
             <div style={{
               padding: '10px 14px', borderRadius: '16px 16px 16px 4px',
               background: 'var(--card)', border: '1px solid var(--border)',
-              color: 'var(--muted)', fontSize: 14, fontFamily: 'DM Mono, monospace', letterSpacing: 2,
+              color: 'var(--muted)', fontSize: 14, fontFamily: 'Exo 2, sans-serif', letterSpacing: 2,
             }}>...</div>
           </div>
         )}
