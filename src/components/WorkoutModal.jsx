@@ -23,7 +23,9 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
   const [restTimer, setRestTimer] = useState(null);
   const [restTotal, setRestTotal] = useState(null);
   const [restActive, setRestActive] = useState(false);
-  const [historyEx, setHistoryEx] = useState(null); // exercise name for history modal
+  const [historyEx, setHistoryEx] = useState(null);
+  const [showVideo, setShowVideo] = useState(false);
+  const [showSummary, setShowSummary] = useState(false); // exercise name for history modal
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const timerRef = useRef(null);
@@ -112,20 +114,36 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
         }
       }
     }
+    setShowSummary(true);
+  }
+
+  function finishWorkout() {
+    setShowSummary(false);
     onComplete(logs);
   }
 
   const ex = exercises[activeEx];
   const exLog = logs[activeEx] || [];
+  function goToEx(i) { setActiveEx(i); setShowVideo(false); }
   const allDone = exercises.every((_, i) => logs[i]?.every(l => l.done));
 
   function updateSet(setIdx, field, val) {
-    setLogs(prev => ({
-      ...prev,
-      [activeEx]: prev[activeEx].map((l, si) =>
-        si === setIdx ? { ...l, [field]: val } : l
-      )
-    }));
+    setLogs(prev => {
+      const exLogs = prev[activeEx];
+      const updated = exLogs.map((l, si) => {
+        if (si === setIdx) return { ...l, [field]: val };
+        // Auto-fill subsequent sets if they haven't been manually changed
+        // Only propagate from the first set, and only if target set is still at default
+        if (setIdx === 0 && si > 0) {
+          const isDefaultReps = l.reps === exLogs[0].reps || l.reps === '';
+          const isDefaultKg = l.kg === exLogs[0].kg || l.kg === '';
+          if (field === 'reps' && (isDefaultReps || l.reps === exLogs[0].reps)) return { ...l, reps: val };
+          if (field === 'kg' && (isDefaultKg || l.kg === exLogs[0].kg)) return { ...l, kg: val };
+        }
+        return l;
+      });
+      return { ...prev, [activeEx]: updated };
+    });
   }
 
   function tickSet(setIdx) {
@@ -154,7 +172,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
         <div>
-          <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', letterSpacing: 3 }}>
+          <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 3 }}>
             {isME ? `ME · WO${s.meWorkoutNumber} · ${s.vest}` : 'STRENGTH SESSION B'}
           </div>
           <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 18, color: 'var(--text)', marginTop: 2 }}>
@@ -185,13 +203,13 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
           </div>
           <div style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--muted)', letterSpacing: 2 }}>REST</span>
+              <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 2 }}>REST</span>
               <span style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 28, color: restTimer <= 5 ? '#EF4444' : 'var(--text)' }}>{restTimer}s</span>
             </div>
             <button onClick={stopRest} style={{
               background: 'transparent', border: '1px solid var(--border)',
               borderRadius: 8, padding: '6px 14px', color: 'var(--muted)',
-              fontSize: 11, fontFamily: 'DM Mono, monospace', cursor: 'pointer',
+              fontSize: 11, fontFamily: 'Exo 2, sans-serif', cursor: 'pointer',
             }}>SKIP</button>
           </div>
         </div>
@@ -207,12 +225,12 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
           const done = logs[i]?.every(l => l.done);
           const partial = logs[i]?.some(l => l.done) && !done;
           return (
-            <button key={i} onClick={() => setActiveEx(i)} style={{
+            <button key={i} onClick={() => goToEx(i)} style={{
               flexShrink: 0, padding: '5px 10px', borderRadius: 20,
               border: `1px solid ${i === activeEx ? 'var(--green)' : 'var(--border)'}`,
               background: done ? 'var(--green)' : i === activeEx ? 'rgba(0,196,106,0.15)' : 'var(--card)',
               color: done ? '#0A0A0A' : i === activeEx ? 'var(--green)' : 'var(--muted)',
-              fontFamily: 'DM Mono, monospace', fontSize: 9, letterSpacing: 1, cursor: 'pointer',
+              fontFamily: 'Exo 2, sans-serif', fontSize: 10, letterSpacing: 1, cursor: 'pointer',
               fontWeight: 700,
             }}>
               {partial ? '◑' : done ? '✓' : String(i + 1).padStart(2, '0')}
@@ -230,7 +248,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
             <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 20, color: 'var(--text)', lineHeight: 1.2 }}>
               {ex?.name}
             </div>
-            <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--green)', marginTop: 3 }}>
+            <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', marginTop: 3 }}>
               {isME
                 ? `${ex?.sets} sets · ${ex?.reps} · ${ex?.rest} rest`
                 : `${ex?.sets} × ${ex?.reps}${ex?.rpe ? ` · RPE ${ex.rpe}` : ''} · rest ${ex?.rest}`
@@ -246,25 +264,39 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
           }} title="Exercise history">📋</button>
         </div>
 
-        {/* Embedded YouTube video */}
+        {/* Embedded YouTube video — toggle */}
         {ex?.videoUrl && (()=>{
-          const videoId = ex.videoUrl.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1];
-          return videoId ? (
-            <div style={{
-              position: 'relative', width: '100%', paddingBottom: '56.25%',
-              borderRadius: 10, overflow: 'hidden', marginBottom: 12,
-              background: '#000',
-            }}>
-              <iframe
-                src={`https://www.youtube.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1`}
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                loading="lazy"
-                title={ex.name}
-              />
+          const videoId = ex.videoUrl.match(/[?&]v=([^&]+)|youtu\.be\/([^?&]+)/)?.slice(1).find(Boolean);
+          if (!videoId) return null;
+          return (
+            <div style={{ marginBottom: 12 }}>
+              <button onClick={() => setShowVideo(v => !v)} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: showVideo ? 'rgba(0,196,106,0.15)' : 'var(--card)',
+                border: `1px solid ${showVideo ? 'var(--green)' : 'var(--border)'}`,
+                borderRadius: 8, padding: '6px 12px',
+                color: showVideo ? 'var(--green)' : 'var(--muted)',
+                fontFamily: 'Exo 2, sans-serif', fontSize: 10,
+                letterSpacing: 1, cursor: 'pointer',
+              }}>
+                {showVideo ? '▼ HIDE VIDEO' : '▶ WATCH DEMO'}
+              </button>
+              {showVideo && (
+                <div style={{
+                  position: 'relative', width: '100%', paddingBottom: '56.25%',
+                  borderRadius: 10, overflow: 'hidden', marginTop: 8, background: '#000',
+                }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1&autoplay=1`}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={ex.name}
+                  />
+                </div>
+              )}
             </div>
-          ) : null;
+          );
         })()}
 
         {/* Coaching cue */}
@@ -302,15 +334,15 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
                     {l.done ? '✓' : si + 1}
                   </div>
                   <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 13, color: l.done ? 'var(--green)' : 'var(--text)', fontWeight: 700 }}>
+                    <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 13, color: l.done ? 'var(--green)' : 'var(--text)', fontWeight: 700 }}>
                       SET {si + 1}
                     </div>
-                    <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>
+                    <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>
                       {ex?.reps} · rest {ex?.rest}
                     </div>
                   </div>
                 </div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: l.done ? 'var(--green)' : 'var(--muted)', letterSpacing: 1 }}>
+                <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: l.done ? 'var(--green)' : 'var(--muted)', letterSpacing: 1 }}>
                   {l.done ? 'DONE' : 'TAP WHEN COMPLETE'}
                 </div>
               </button>
@@ -327,23 +359,23 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
                 borderRadius: 10, padding: '10px 12px',
                 transition: 'background 0.2s',
               }}>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--muted)', textAlign: 'center' }}>
-                  S{si + 1}
+                <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', textAlign: 'center', lineHeight: 1.3 }}>
+                  Set<br/>{si + 1}
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--muted)', marginBottom: 3 }}>REPS</div>
+                  <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginBottom: 3 }}>REPS</div>
                   <input
                     value={l.reps}
                     onChange={e => updateSet(si, 'reps', e.target.value)}
                     style={{
                       width: '100%', background: 'var(--surface)', border: '1px solid var(--border)',
                       borderRadius: 6, color: 'var(--text)', fontSize: 15,
-                      fontFamily: 'DM Mono, monospace', padding: '6px 8px', outline: 'none',
+                      fontFamily: 'Exo 2, sans-serif', padding: '6px 8px', outline: 'none',
                     }}
                   />
                 </div>
                 <div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--muted)', marginBottom: 3 }}>KG</div>
+                  <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginBottom: 3 }}>KG</div>
                   <input
                     value={l.kg}
                     onChange={e => updateSet(si, 'kg', e.target.value)}
@@ -351,7 +383,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
                     style={{
                       width: '100%', background: 'var(--surface)', border: '1px solid var(--border)',
                       borderRadius: 6, color: 'var(--text)', fontSize: 15,
-                      fontFamily: 'DM Mono, monospace', padding: '6px 8px', outline: 'none',
+                      fontFamily: 'Exo 2, sans-serif', padding: '6px 8px', outline: 'none',
                     }}
                   />
                 </div>
@@ -373,7 +405,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
           <button onClick={() => startRest(ex?.rest || '90sec')} style={{
             marginTop: 14, width: '100%', background: 'var(--card)',
             border: '1px solid var(--border)', borderRadius: 10,
-            padding: '10px', color: 'var(--muted)', fontFamily: 'DM Mono, monospace',
+            padding: '10px', color: 'var(--muted)', fontFamily: 'Exo 2, sans-serif',
             fontSize: 10, letterSpacing: 1, cursor: 'pointer',
           }}>
             START REST TIMER · {ex?.rest}
@@ -389,7 +421,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
         display: 'flex', gap: 8,
       }}>
         {activeEx < exercises.length - 1 ? (
-          <button onClick={() => setActiveEx(activeEx + 1)} style={{
+          <button onClick={() => goToEx(activeEx + 1)} style={{
             flex: 1, background: 'var(--card)', border: '1px solid var(--border)',
             borderRadius: 13, padding: 16, color: 'var(--text)', fontSize: 14,
             fontWeight: 600, cursor: 'pointer',
@@ -408,6 +440,96 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
         </button>
       </div>
 
+      {/* ── COMPLETION SUMMARY ── */}
+      {showSummary && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 20,
+          background: 'var(--bg)', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+        }}>
+          {/* Header */}
+          <div style={{
+            flexShrink: 0, padding: '20px 16px',
+            paddingTop: 'calc(20px + env(safe-area-inset-top, 0px))',
+            background: 'var(--surface)', borderBottom: '1px solid var(--border)',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 8 }}>🏋️</div>
+            <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 22, color: 'var(--green)' }}>
+              Workout Complete
+            </div>
+            <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: 4, letterSpacing: 2 }}>
+              {session.name.toUpperCase()}
+            </div>
+          </div>
+
+          {/* Exercise summary list */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 24px' }}>
+            {exercises.map((ex, i) => {
+              const exLogs = logs[i] || [];
+              const doneSets = exLogs.filter(l => l.done);
+              if (doneSets.length === 0) return null;
+              const bestKg = doneSets.map(l => parseFloat(l.kg) || 0).filter(Boolean);
+              const bestSet = bestKg.length > 0
+                ? doneSets[bestKg.indexOf(Math.max(...bestKg))]
+                : doneSets[doneSets.length - 1];
+              return (
+                <div key={i} style={{
+                  background: 'var(--card)', border: '1px solid var(--border)',
+                  borderRadius: 12, padding: '12px 14px', marginBottom: 10,
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                    <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 15, color: 'var(--text)', flex: 1 }}>
+                      {ex.name}
+                    </div>
+                    <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 1, marginLeft: 8 }}>
+                      {doneSets.length} sets
+                    </div>
+                  </div>
+                  {/* Set breakdown */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: isME ? 0 : 6 }}>
+                    {doneSets.map((l, si) => (
+                      <div key={si} style={{
+                        background: 'var(--surface)', borderRadius: 6, padding: '4px 8px',
+                        fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--text)',
+                      }}>
+                        <span style={{ color: 'var(--muted)', fontSize: 10 }}>S{si+1} </span>
+                        {isME
+                          ? <span style={{ color: 'var(--green)' }}>{l.reps}</span>
+                          : <><span style={{ color: 'var(--green)', fontWeight: 700 }}>{l.reps}</span>
+                            <span style={{ color: 'var(--muted)' }}> × </span>
+                            <span style={{ fontWeight: 700 }}>{l.kg || 'BW'}</span></>
+                        }
+                      </div>
+                    ))}
+                  </div>
+                  {/* Best set for strength sessions */}
+                  {!isME && bestSet && parseFloat(bestSet.kg) > 0 && (
+                    <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 1 }}>
+                      BEST: {bestSet.reps} reps × {bestSet.kg}kg
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* CTA */}
+          <div style={{
+            flexShrink: 0, padding: '12px 16px',
+            paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 8px))',
+            background: 'var(--bg)', borderTop: '1px solid var(--border)',
+          }}>
+            <button onClick={finishWorkout} style={{
+              width: '100%', background: 'var(--green)', color: '#0A0A0A',
+              border: 'none', borderRadius: 13, padding: 17,
+              fontSize: 16, fontWeight: 800, cursor: 'pointer',
+            }}>
+              Done ✓
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ── EXERCISE HISTORY MODAL ── */}
       {historyEx && (
         <div style={{
@@ -424,7 +546,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
             {/* History header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', letterSpacing: 3 }}>EXERCISE HISTORY</div>
+                <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 3 }}>EXERCISE HISTORY</div>
                 <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 18, color: 'var(--text)', marginTop: 2 }}>{historyEx}</div>
               </div>
               <button onClick={() => setHistoryEx(null)} style={{
@@ -435,7 +557,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
             </div>
 
             {historyLoading && (
-              <div style={{ textAlign: 'center', padding: 32, color: 'var(--muted)', fontFamily: 'DM Mono, monospace', fontSize: 11 }}>
+              <div style={{ textAlign: 'center', padding: 32, color: 'var(--muted)', fontFamily: 'Exo 2, sans-serif', fontSize: 11 }}>
                 LOADING...
               </div>
             )}
@@ -443,7 +565,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
             {!historyLoading && historyData.length === 0 && (
               <div style={{
                 textAlign: 'center', padding: '32px 16px',
-                color: 'var(--muted)', fontFamily: 'DM Mono, monospace', fontSize: 11, letterSpacing: 1,
+                color: 'var(--muted)', fontFamily: 'Exo 2, sans-serif', fontSize: 11, letterSpacing: 1,
               }}>
                 NO HISTORY YET — LOG YOUR FIRST SESSION
               </div>
@@ -455,10 +577,10 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
                 borderRadius: 12, padding: 14, marginBottom: 10,
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--green)' }}>
+                  <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)' }}>
                     Week {(entry.weekIdx || 0) + 1}
                   </div>
-                  <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--muted)' }}>
+                  <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)' }}>
                     {new Date(entry.date).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' })}
                   </div>
                 </div>
@@ -467,9 +589,9 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
                     <div key={si} style={{
                       background: 'var(--card)', border: '1px solid var(--border)',
                       borderRadius: 8, padding: '6px 10px',
-                      fontFamily: 'DM Mono, monospace', fontSize: 11, color: 'var(--text)',
+                      fontFamily: 'Exo 2, sans-serif', fontSize: 11, color: 'var(--text)',
                     }}>
-                      <span style={{ color: 'var(--muted)', fontSize: 9 }}>S{set.set} </span>
+                      <span style={{ color: 'var(--muted)', fontSize: 10 }}>S{set.set} </span>
                       <span style={{ color: 'var(--green)', fontWeight: 700 }}>{set.reps}</span>
                       <span style={{ color: 'var(--muted)' }}> × </span>
                       <span style={{ fontWeight: 700 }}>{set.kg}</span>
