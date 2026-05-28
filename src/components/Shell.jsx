@@ -36,13 +36,18 @@ export default function Shell(props) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '10px 16px',
         paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
+        position: 'fixed',
       }}>
         {/* Shield — opens drawer */}
-        <button onClick={() => setDrawerOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
+        <button onClick={() => setDrawerOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <ShieldIcon size={32}/>
         </button>
-        {/* Current tab label */}
-        <span style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 13, letterSpacing: 3, color: 'var(--text)' }}>
+        {/* Tab label — absolutely centred */}
+        <span style={{
+          position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+          fontFamily: 'Archivo Black, sans-serif', fontSize: 13, letterSpacing: 3, color: 'var(--text)',
+          pointerEvents: 'none',
+        }}>
           {NAV.find(n => n.id === tab)?.label.toUpperCase() || 'PLAN'}
         </span>
         {/* Coach button */}
@@ -50,6 +55,7 @@ export default function Shell(props) {
           background: 'rgba(0,196,106,0.15)', border: '1px solid rgba(0,196,106,0.4)',
           color: 'var(--green)', borderRadius: 20, padding: '6px 14px',
           fontSize: 11, fontWeight: 700, fontFamily: 'DM Mono, monospace', letterSpacing: 1, cursor: 'pointer',
+          flexShrink: 0, marginLeft: 'auto',
         }}>
           COACH
         </button>
