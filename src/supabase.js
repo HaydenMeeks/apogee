@@ -48,7 +48,9 @@ export async function loadCompletionsFromDB(userId) {
       done: row.done,
       time: row.time_logged || '',
       dist: row.dist_logged || '',
-      notes: row.notes || '',
+      notes: (() => { try { const p = JSON.parse(row.notes); return p.notes||''; } catch(e) { return row.notes||''; } })(),
+      vestWeight: (() => { try { const p = JSON.parse(row.notes); return p.vestWeight||''; } catch(e) { return ''; } })(),
+      vestVert: (() => { try { const p = JSON.parse(row.notes); return p.vestVert||''; } catch(e) { return ''; } })(),
     };
   });
   return result;
@@ -64,7 +66,9 @@ export async function saveCompletionToDB(userId, weekIdx, sessionId, data) {
       done: data.done,
       time_logged: data.time || null,
       dist_logged: data.dist || null,
-      notes: data.notes || null,
+      notes: data.vestWeight || data.vestVert
+        ? JSON.stringify({ notes: data.notes||'', vestWeight: data.vestWeight||'', vestVert: data.vestVert||'' })
+        : data.notes || null,
       updated_at: new Date().toISOString(),
     }, { onConflict: 'user_id,week_idx,session_id' });
   return !error;
