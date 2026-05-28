@@ -29,9 +29,17 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
   const timerRef = useRef(null);
 
   // ── REST TIMER ──────────────────────────────────────────────────────────────
-  // Unlock audio on first tap — needed for autoplay policy
+  // Unlock audio on first tap — iOS requires a real play() call from a user gesture
+  const audioUnlockedRef = useRef(false);
   function unlockAudio() {
-    try { new Audio('/timer-end.mp3').load(); } catch(e) {}
+    if (audioUnlockedRef.current) return;
+    try {
+      const a = new Audio('/timer-end.mp3');
+      a.volume = 0;
+      const p = a.play();
+      if (p) p.then(() => { a.pause(); a.currentTime = 0; a.volume = 0.8; endAudioRef.current = a; }).catch(() => {});
+      audioUnlockedRef.current = true;
+    } catch(e) {}
   }
 
   const endAudioRef = useRef(null);
@@ -41,7 +49,9 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
       // Start the 6-second clip at exactly 6 seconds remaining
       if (restTimer === 6) {
         try {
-          const audio = new Audio('/timer-end.mp3');
+          // Reuse pre-unlocked audio if available (iOS), otherwise create fresh
+          const audio = endAudioRef.current || new Audio('/timer-end.mp3');
+          audio.currentTime = 0;
           audio.volume = 0.8;
           endAudioRef.current = audio;
           audio.play().catch(() => {});
