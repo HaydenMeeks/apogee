@@ -54,7 +54,7 @@ export default function Shell(props) {
         <button onClick={() => setCoachOpen(true)} style={{
           background: 'rgba(0,196,106,0.15)', border: '1px solid rgba(0,196,106,0.4)',
           color: 'var(--green)', borderRadius: 20, padding: '6px 14px',
-          fontSize: 11, fontWeight: 700, fontFamily: 'DM Mono, monospace', letterSpacing: 1, cursor: 'pointer',
+          fontSize: 11, fontWeight: 700, fontFamily: 'Exo 2, sans-serif', letterSpacing: 1, cursor: 'pointer',
           flexShrink: 0, marginLeft: 'auto',
         }}>
           COACH
@@ -93,9 +93,9 @@ export default function Shell(props) {
             {races.map((r, i) => (
               <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px' }}>
                 <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 24, color: 'var(--green)', lineHeight: 1 }}>{daysTo(r.date)}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--muted)', letterSpacing: 1, marginTop: 1 }}>DAYS TO GO</div>
+                <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 1, marginTop: 1 }}>DAYS TO GO</div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>{r.name.split('·')[0].trim()}</div>
-                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', marginTop: 2 }}>{r.goal}</div>}
+                {r.goal && <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', marginTop: 2 }}>{r.goal}</div>}
               </div>
             ))}
           </div>
@@ -130,9 +130,9 @@ export default function Shell(props) {
 
         {/* Bottom — settings */}
         <div style={{ padding: '12px 12px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {syncing && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', letterSpacing: 2, padding: '4px 14px' }}>SYNCING…</div>}
+          {syncing && <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 2, padding: '4px 14px' }}>SYNCING…</div>}
           <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
+            <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
               {theme === 'dark' ? '🌙  DARK' : '☀️  LIGHT'}
             </span>
             <button onClick={toggleTheme} style={{
@@ -153,7 +153,7 @@ export default function Shell(props) {
             padding: '10px 14px', borderRadius: 9,
             background: 'var(--card)', border: '1px solid rgba(255,255,255,0.08)',
             color: 'var(--muted)', fontSize: 11, fontWeight: 600,
-            fontFamily: 'DM Mono, monospace', letterSpacing: 1, cursor: 'pointer', width: '100%', textAlign: 'left',
+            fontFamily: 'Exo 2, sans-serif', letterSpacing: 1, cursor: 'pointer', width: '100%', textAlign: 'left',
           }}>
             MANAGE PLAN
           </button>
@@ -161,7 +161,7 @@ export default function Shell(props) {
             padding: '10px 14px', borderRadius: 9,
             background: 'transparent', border: 'none',
             color: 'var(--muted)', fontSize: 12, cursor: 'pointer',
-            fontFamily: 'DM Mono, monospace', letterSpacing: 1, textAlign: 'left',
+            fontFamily: 'Exo 2, sans-serif', letterSpacing: 1, textAlign: 'left',
           }}>
             Sign out · {user?.email?.split('@')[0]}
           </button>
@@ -172,16 +172,16 @@ export default function Shell(props) {
       <aside className="desk-sidebar" style={{ display: 'none', width: 260, flexShrink: 0, background: 'var(--surface)', borderRight: '1px solid rgba(255,255,255,0.08)', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50 }}>
         <div style={{ padding: '26px 20px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <ShieldIcon size={32}/>
-          {syncing && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--green)', letterSpacing: 2, marginLeft: 'auto' }}>SYNCING…</div>}
+          {syncing && <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 2, marginLeft: 'auto' }}>SYNCING…</div>}
         </div>
         {races.length >= 1 && (
           <div style={{ padding: '12px 16px 0', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {races.map((r, i) => (
               <div key={i} style={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px' }}>
                 <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 24, color: 'var(--green)', lineHeight: 1 }}>{daysTo(r.date)}</div>
-                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'var(--muted)', letterSpacing: 1, marginTop: 1 }}>DAYS TO GO</div>
+                <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 1, marginTop: 1 }}>DAYS TO GO</div>
                 <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginTop: 4 }}>{r.name.split('·')[0].trim()}</div>
-                {r.goal && <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'var(--green)', marginTop: 2 }}>{r.goal}</div>}
+                {r.goal && <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', marginTop: 2 }}>{r.goal}</div>}
               </div>
             ))}
           </div>
@@ -198,7 +198,7 @@ export default function Shell(props) {
         </nav>
         <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px' }}>
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
+            <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
               {theme === 'dark' ? '🌙  DARK' : '☀️  LIGHT'}
             </span>
             <button onClick={toggleTheme} style={{
@@ -215,10 +215,10 @@ export default function Shell(props) {
               }}/>
             </button>
           </div>
-          <button onClick={() => setPlanModal(true)} style={{ width: '100%', background: 'var(--card)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(244,244,242,0.6)', fontSize: 10, fontWeight: 600, padding: '9px 12px', borderRadius: 8, fontFamily: 'DM Mono, monospace', letterSpacing: 1, cursor: 'pointer' }}>
+          <button onClick={() => setPlanModal(true)} style={{ width: '100%', background: 'var(--card)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(244,244,242,0.6)', fontSize: 10, fontWeight: 600, padding: '9px 12px', borderRadius: 8, fontFamily: 'Exo 2, sans-serif', letterSpacing: 1, cursor: 'pointer' }}>
             MANAGE PLAN
           </button>
-          <button onClick={() => signOut()} style={{ width: '100%', background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'DM Mono, monospace', letterSpacing: 1 }}>
+          <button onClick={() => signOut()} style={{ width: '100%', background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'Exo 2, sans-serif', letterSpacing: 1 }}>
             Sign out ({user?.email?.split('@')[0]})
           </button>
         </div>
