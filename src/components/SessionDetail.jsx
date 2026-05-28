@@ -8,16 +8,21 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
   const [distVal, setDistVal] = useState('');
   const [workoutOpen, setWorkoutOpen] = useState(false);
   const [justDone, setJustDone] = useState(false);
+  const [vestWeight, setVestWeight] = useState('');
+  const [vestVert, setVestVert] = useState('');
   const tc = SESSION_TYPES[s.type]||SESSION_TYPES.easy;
   const isDone = completion?.done;
   const isGym = s.isGym;
+  const isVest = s.type === 'vest';
 
   const handleTick = () => {
     const mins = parseInt(timeVal)||0;
     onTick(wkIdx, s.id, {
       time: mins>0?`${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')}`:'',
-      dist: distVal,
-      notes: '',
+      dist: isVest ? '' : distVal,
+      notes: isVest ? `${vestWeight?vestWeight+'kg pack':''} ${vestVert?vestVert+'m vert':''}`.trim() : '',
+      vestWeight: isVest ? vestWeight : '',
+      vestVert: isVest ? vestVert : '',
     });
     setJustDone(true); setTimeout(()=>setJustDone(false),1500);
   };
@@ -180,24 +185,39 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
             </div>
           )}
 
-          {/* Run log */}
+          {/* Run / Vest log */}
           {!isGym&&!isDone&&(
             <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:14,marginBottom:12}}>
-              <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:3,marginBottom:10}}>LOG THIS SESSION</div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-                <LInput label="TIME (min)" type="number" placeholder="60" val={timeVal} set={setTimeVal}/>
-                <LInput label="KM" type="number" placeholder="—" val={distVal} set={setDistVal} step="0.1"/>
+              <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',letterSpacing:3,marginBottom:10}}>
+                {isVest ? 'LOG THIS SESSION' : 'LOG THIS SESSION'}
               </div>
+              {isVest ? (
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  <LInput label="TIME (min)" type="number" placeholder="55" val={timeVal} set={setTimeVal}/>
+                  <LInput label="PACK WEIGHT (kg)" type="number" placeholder="8" val={vestWeight} set={setVestWeight} step="0.5"/>
+                  <LInput label="VERT (m)" type="number" placeholder="400" val={vestVert} set={setVestVert}/>
+                  <div style={{display:'flex',alignItems:'flex-end'}}>
+                    <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--muted)',lineHeight:1.4}}>Track vert in Coros. Log total elevation gain.</div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                  <LInput label="TIME (min)" type="number" placeholder="60" val={timeVal} set={setTimeVal}/>
+                  <LInput label="KM" type="number" placeholder="—" val={distVal} set={setDistVal} step="0.1"/>
+                </div>
+              )}
             </div>
           )}
 
           {/* Done summary */}
-          {isDone&&!isGym&&(completion?.time||completion?.dist)&&(
+          {isDone&&!isGym&&(completion?.time||completion?.dist||completion?.vestVert||completion?.vestWeight)&&(
             <div style={{background:'var(--card)',border:'1px solid var(--green)',borderRadius:12,padding:14,marginBottom:12}}>
               <div style={{fontFamily:'DM Mono,monospace',fontSize:9,color:'var(--green)',letterSpacing:3,marginBottom:8}}>LOGGED</div>
               <div style={{display:'flex',gap:12,flexWrap:'wrap'}}>
                 {completion.time&&<div><div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,color:'var(--text)'}}>{completion.time}</div><div style={{fontFamily:'DM Mono,monospace',fontSize:8,color:'var(--muted)'}}>TIME</div></div>}
-                {completion.dist&&parseFloat(completion.dist)>0&&<div><div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,color:'var(--text)'}}>{parseFloat(completion.dist).toFixed(1)}km</div><div style={{fontFamily:'DM Mono,monospace',fontSize:8,color:'var(--muted)'}}>DIST</div></div>}
+                {!isVest&&completion.dist&&parseFloat(completion.dist)>0&&<div><div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,color:'var(--text)'}}>{parseFloat(completion.dist).toFixed(1)}km</div><div style={{fontFamily:'DM Mono,monospace',fontSize:8,color:'var(--muted)'}}>DIST</div></div>}
+                {isVest&&completion.vestWeight&&<div><div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,color:'var(--text)'}}>{completion.vestWeight}kg</div><div style={{fontFamily:'DM Mono,monospace',fontSize:8,color:'var(--muted)'}}>PACK</div></div>}
+                {isVest&&completion.vestVert&&<div><div style={{fontFamily:'Archivo Black,sans-serif',fontSize:22,color:'var(--text)'}}>{completion.vestVert}m</div><div style={{fontFamily:'DM Mono,monospace',fontSize:8,color:'var(--muted)'}}>VERT</div></div>}
               </div>
             </div>
           )}
