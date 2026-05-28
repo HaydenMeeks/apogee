@@ -1,6 +1,10 @@
 import { SESSION_TYPES } from '../utils.js';
 
-export function LogTab({ history, deleteHistoryEntry }) {
+export function LogTab({ history, setHistory }) {
+  const deleteEntry = (id) => {
+    setHistory(prev => prev.filter(e => e.id !== id));
+  };
+
   if (!history?.length) {
     return (
       <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'60vh', padding:32, textAlign:'center' }}>
@@ -12,7 +16,7 @@ export function LogTab({ history, deleteHistoryEntry }) {
 
   return (
     <div style={{ padding:'16px 14px 24px' }}>
-      <div style={{ fontFamily:'DM Mono,monospace', fontSize:9, color:'var(--green)', letterSpacing:3, marginBottom:10, fontWeight:700 }}>
+      <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--green)', letterSpacing:3, marginBottom:10, fontWeight:700 }}>
         SESSION HISTORY
       </div>
       {(history || []).map(e => {
@@ -21,7 +25,7 @@ export function LogTab({ history, deleteHistoryEntry }) {
         const ds = d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
         const ts = d.toLocaleTimeString('en-AU', { hour:'2-digit', minute:'2-digit' });
         return (
-          <HistoryEntry key={e.id} entry={e} tc={tc} ds={ds} ts={ts} onDelete={() => deleteHistoryEntry(e.id)}/>
+          <HistoryEntry key={e.id} entry={e} tc={tc} ds={ds} ts={ts} onDelete={() => deleteEntry(e.id)}/>
         );
       })}
     </div>
@@ -34,12 +38,12 @@ function HistoryEntry({ entry: e, tc, ds, ts, onDelete }) {
       <div style={{ padding:'12px 13px', borderLeft:`2px solid ${tc.color}` }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:6 }}>
           <div>
-            <div style={{ fontFamily:'DM Mono,monospace', fontSize:9, color: tc.color, marginBottom:2, letterSpacing:1 }}>
+            <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color: tc.color, marginBottom:2, letterSpacing:1 }}>
               {ds} · {ts}
             </div>
             <div style={{ fontSize:14, fontWeight:700 }}>{e.workout}</div>
           </div>
-          <span style={{ fontSize:9, fontFamily:'DM Mono,monospace', background: tc.bg, color: tc.color, padding:'2px 7px', borderRadius:5, fontWeight:700, flexShrink:0, marginLeft:8 }}>
+          <span style={{ fontSize:10, fontFamily:'Exo 2, sans-serif', background: tc.bg, color: tc.color, padding:'2px 7px', borderRadius:5, fontWeight:700, flexShrink:0, marginLeft:8 }}>
             {tc.label}
           </span>
         </div>
@@ -47,11 +51,11 @@ function HistoryEntry({ entry: e, tc, ds, ts, onDelete }) {
         {e.type === 'gym' && e.exercises && (
           <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
             {e.exercises.slice(0, 3).map((ex, i) => (
-              <div key={i} style={{ fontSize:11, color:'var(--text2)', fontFamily:'DM Mono,monospace' }}>
+              <div key={i} style={{ fontSize:11, color:'var(--text2)', fontFamily:'Exo 2, sans-serif' }}>
                 {ex.name} · <span style={{ color:'var(--green)' }}>{ex.sets}×{ex.reps}</span>{ex.weight > 0 ? ` @ ${ex.weight}kg` : ''}
               </div>
             ))}
-            {e.exercises.length > 3 && <div style={{ fontSize:10, color:'var(--muted)', fontFamily:'DM Mono,monospace' }}>+{e.exercises.length - 3} more</div>}
+            {e.exercises.length > 3 && <div style={{ fontSize:10, color:'var(--muted)', fontFamily:'Exo 2, sans-serif' }}>+{e.exercises.length - 3} more</div>}
           </div>
         )}
 
@@ -64,7 +68,7 @@ function HistoryEntry({ entry: e, tc, ds, ts, onDelete }) {
 
         {e.notes && <div style={{ fontSize:11, color:'var(--muted)', fontStyle:'italic', marginTop:6 }}>"{e.notes}"</div>}
 
-        <button onClick={onDelete} style={{ marginTop:8, background:'none', border:'none', color:'var(--race)', fontSize:10, fontFamily:'DM Mono,monospace', cursor:'pointer', opacity:.5, padding:0 }}>
+        <button onClick={onDelete} style={{ marginTop:8, background:'none', border:'none', color:'var(--race)', fontSize:10, fontFamily:'Exo 2, sans-serif', cursor:'pointer', opacity:.5, padding:0 }}>
           ✕ Delete
         </button>
       </div>
@@ -75,8 +79,8 @@ function HistoryEntry({ entry: e, tc, ds, ts, onDelete }) {
 function Stat({ val, lbl }) {
   return (
     <div style={{ background:'var(--surface)', borderRadius:7, padding:'6px 9px' }}>
-      <div style={{ fontFamily:'DM Mono,monospace', fontSize:12, fontWeight:700, color:'var(--text)' }}>{val}</div>
-      <div style={{ fontFamily:'DM Mono,monospace', fontSize:8, color:'var(--muted)', letterSpacing:1 }}>{lbl}</div>
+      <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:12, fontWeight:700, color:'var(--text)' }}>{val}</div>
+      <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--muted)', letterSpacing:1 }}>{lbl}</div>
     </div>
   );
 }
@@ -99,7 +103,7 @@ export function StatsTab({ plan, completions, history }) {
 
   return (
     <div style={{ padding:'16px 14px 24px' }}>
-      <div style={{ fontFamily:'DM Mono,monospace', fontSize:9, color:'var(--green)', letterSpacing:3, marginBottom:10, fontWeight:700 }}>OVERVIEW</div>
+      <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--green)', letterSpacing:3, marginBottom:10, fontWeight:700 }}>OVERVIEW</div>
       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:14 }}>
         {[
           { val: total, lbl: 'Total Sessions' },
@@ -123,7 +127,7 @@ function StatCard({ val, lbl }) {
   return (
     <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:'13px 14px' }}>
       <div style={{ fontFamily:'Archivo Black,sans-serif', fontSize:36, color:'var(--green)', lineHeight:1 }}>{val}</div>
-      <div style={{ fontFamily:'DM Mono,monospace', fontSize:9, color:'var(--muted)', letterSpacing:1, marginTop:4 }}>{lbl}</div>
+      <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--muted)', letterSpacing:1, marginTop:4 }}>{lbl}</div>
     </div>
   );
 }
@@ -131,11 +135,11 @@ function StatCard({ val, lbl }) {
 function ProgressCard({ label, done, total, pct }) {
   return (
     <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:'13px 14px', marginBottom:8 }}>
-      <div style={{ fontFamily:'DM Mono,monospace', fontSize:9, color:'var(--muted)', letterSpacing:2, marginBottom:6 }}>{label.toUpperCase()}</div>
+      <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--muted)', letterSpacing:2, marginBottom:6 }}>{label.toUpperCase()}</div>
       <div style={{ height:5, background:'var(--border)', borderRadius:3, overflow:'hidden', marginBottom:5 }}>
         <div style={{ width:`${pct}%`, height:'100%', background:'var(--green)', borderRadius:3, transition:'width .6s ease' }}/>
       </div>
-      <div style={{ display:'flex', justifyContent:'space-between', fontFamily:'DM Mono,monospace', fontSize:10, color:'var(--muted)' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--muted)' }}>
         <span>{done}/{total} sessions</span><span>{pct}%</span>
       </div>
     </div>
