@@ -6,7 +6,7 @@ export default function Heatmap({ plan, completions }) {
 
   return (
     <div style={{ background: '#1C1C1C', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px', overflow: 'hidden' }}>
-      <div style={{ fontFamily: 'DM Mono, monospace', fontSize: 9, color: 'rgba(244,244,242,0.35)', letterSpacing: 3, marginBottom: 10 }}>TRAINING LOAD · 25 WEEKS</div>
+      <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'rgba(244,244,242,0.35)', letterSpacing: 3, marginBottom: 10 }}>TRAINING LOAD · 25 WEEKS</div>
       <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
         {plan.weeks.map((w, wi) => {
           const nonRest = w.sessions.filter(s => s.type !== 'rest');
@@ -48,7 +48,7 @@ export default function Heatmap({ plan, completions }) {
         ].map(([color, label]) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <div style={{ width: 8, height: 8, borderRadius: 2, background: color, flexShrink: 0 }}/>
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 8, color: 'rgba(244,244,242,0.3)', letterSpacing: 1 }}>{label.toUpperCase()}</span>
+            <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'rgba(244,244,242,0.3)', letterSpacing: 1 }}>{label.toUpperCase()}</span>
           </div>
         ))}
       </div>
