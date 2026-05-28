@@ -178,7 +178,7 @@ export default function Splash({ plan, onEnter }) {
                 <span key={i} className={`letter l${i+1}`}>{l}</span>
               ))}
             </div>
-            <div className="tag-line" style={{ display:'flex', alignItems:'center', gap:14, fontFamily:'DM Mono,monospace', fontSize:12, letterSpacing:'0.5em', color:'#00C46A' }}>
+            <div className="tag-line" style={{ display:'flex', alignItems:'center', gap:14, fontFamily:'Exo 2, sans-serif', fontSize:12, letterSpacing:'0.5em', color:'#00C46A' }}>
               <div className="bar-l" style={{ width:28, height:1, background:'#00C46A' }}/>
               ULTRA TRAINING
               <div className="bar-r" style={{ width:28, height:1, background:'#00C46A' }}/>
@@ -192,7 +192,7 @@ export default function Splash({ plan, onEnter }) {
             <div style={{ fontFamily:'Archivo Black,sans-serif', fontSize:48, color:'#00C46A', lineHeight:1, textShadow:'0 0 20px rgba(0,196,106,.5)' }}>
               {daysTo(races[races.length - 1].date)}
             </div>
-            <div style={{ fontFamily:'DM Mono,monospace', fontSize:10, color:'rgba(244,244,242,.35)', letterSpacing:3, marginTop:5 }}>
+            <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'rgba(244,244,242,.35)', letterSpacing:3, marginTop:5 }}>
               DAYS TO GPT100
             </div>
           </div>
