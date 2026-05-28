@@ -23,6 +23,10 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
   const [restTimer, setRestTimer] = useState(null);
   const [restTotal, setRestTotal] = useState(null);
   const [restActive, setRestActive] = useState(false);
+<<<<<<< Updated upstream
+=======
+  const restEndTime = useRef(null); // wall clock end time
+>>>>>>> Stashed changes
   const [historyEx, setHistoryEx] = useState(null);
   const [showVideo, setShowVideo] = useState(false);
   const [showSummary, setShowSummary] = useState(false); // exercise name for history modal
@@ -31,12 +35,18 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
   const timerRef = useRef(null);
 
   // ── REST TIMER ──────────────────────────────────────────────────────────────
+<<<<<<< Updated upstream
   // Unlock audio on first tap — iOS requires a real play() call from a user gesture
   // Use a silent 1-second blank audio buffer instead of the actual track
+=======
+  // Preload audio on first tap without creating an AudioContext
+  // AudioContext causes browser to steal audio focus from Spotify etc
+>>>>>>> Stashed changes
   const audioUnlockedRef = useRef(false);
   function unlockAudio() {
     if (audioUnlockedRef.current) return;
     try {
+<<<<<<< Updated upstream
       // Create a silent AudioContext buffer to unlock — doesn't play the mp3
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const buf = ctx.createBuffer(1, 1, 22050);
@@ -48,6 +58,11 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
       const a = new Audio('/timer-end.mp3');
       a.volume = 0.8;
       a.load();
+=======
+      const a = new Audio('/timer-end.mp3');
+      a.volume = 0.8;
+      a.load(); // preload only, no play — no AudioContext, no Spotify interruption
+>>>>>>> Stashed changes
       endAudioRef.current = a;
       audioUnlockedRef.current = true;
     } catch(e) {}
@@ -56,6 +71,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
   const endAudioRef = useRef(null);
 
   useEffect(() => {
+<<<<<<< Updated upstream
     if (restActive && restTimer > 0) {
       // Start the 6-second clip at exactly 6 seconds remaining
       if (restTimer === 6) {
@@ -70,19 +86,49 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
       }
       timerRef.current = setTimeout(() => setRestTimer(t => t - 1), 1000);
     } else if (restActive && restTimer === 0) {
+=======
+    if (!restActive || restTimer === null) return;
+
+    if (restTimer <= 0) {
+>>>>>>> Stashed changes
       setRestActive(false);
+      return;
     }
+
+    // Play audio at 6 seconds remaining
+    if (restTimer === 6) {
+      try {
+        const audio = endAudioRef.current || new Audio('/timer-end.mp3');
+        audio.currentTime = 0;
+        audio.volume = 0.8;
+        endAudioRef.current = audio;
+        audio.play().catch(() => {});
+      } catch(e) {}
+    }
+
+    // Wall clock based — immune to background throttling
+    // Calculate ms until next whole second boundary
+    const now = Date.now();
+    const remaining = restEndTime.current - now;
+    const nextTick = Math.max(0, (remaining % 1000) || 1000);
+
+    timerRef.current = setTimeout(() => {
+      const secondsLeft = Math.max(0, Math.round((restEndTime.current - Date.now()) / 1000));
+      setRestTimer(secondsLeft);
+    }, nextTick);
+
     return () => clearTimeout(timerRef.current);
   }, [restActive, restTimer]);
 
   function startRest(seconds) {
     const secs = parseInt(String(seconds).replace(/[^0-9]/g, '')) || 60;
+    restEndTime.current = Date.now() + secs * 1000;
     setRestTimer(secs);
     setRestTotal(secs);
     setRestActive(true);
   }
 
-  function stopRest() { setRestActive(false); setRestTimer(null); setRestTotal(null); }
+  function stopRest() { setRestActive(false); setRestTimer(null); setRestTotal(null); restEndTime.current = null; }
 
   // ── EXERCISE HISTORY ────────────────────────────────────────────────────────
   async function openHistory(exName) {
@@ -132,6 +178,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
       const exLogs = prev[activeEx];
       const updated = exLogs.map((l, si) => {
         if (si === setIdx) return { ...l, [field]: val };
+<<<<<<< Updated upstream
         // Auto-fill subsequent sets if they haven't been manually changed
         // Only propagate from the first set, and only if target set is still at default
         if (setIdx === 0 && si > 0) {
@@ -139,6 +186,17 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
           const isDefaultKg = l.kg === exLogs[0].kg || l.kg === '';
           if (field === 'reps' && (isDefaultReps || l.reps === exLogs[0].reps)) return { ...l, reps: val };
           if (field === 'kg' && (isDefaultKg || l.kg === exLogs[0].kg)) return { ...l, kg: val };
+=======
+        // Auto-fill the next set with whatever the current set has
+        // Only fill sets that still match the previous set's value (haven't been manually changed)
+        if (si === setIdx + 1) {
+          const prevVal = exLogs[setIdx][field];
+          const currentVal = l[field];
+          // Only update if this set still matches the previous set (not manually overridden)
+          if (currentVal === prevVal || currentVal === '') {
+            return { ...l, [field]: val };
+          }
+>>>>>>> Stashed changes
         }
         return l;
       });
@@ -233,7 +291,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
               fontFamily: 'Exo 2, sans-serif', fontSize: 10, letterSpacing: 1, cursor: 'pointer',
               fontWeight: 700,
             }}>
-              {partial ? '◑' : done ? '✓' : String(i + 1).padStart(2, '0')}
+              {done ? '✓' : partial ? '…' : String(i + 1).padStart(2, '0')}
             </button>
           );
         })}
