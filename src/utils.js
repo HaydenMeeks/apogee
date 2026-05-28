@@ -4,14 +4,14 @@ export const DB = {
 };
 
 export const SESSION_TYPES = {
-  easy:  { label: 'Easy Z2',   color: '#3B82F6', bg: 'rgba(59,130,246,.15)'  },
-  vest:  { label: 'Vest',      color: '#EC4899', bg: 'rgba(236,72,153,.15)'  },
-  speed: { label: 'Speed',     color: '#F59E0B', bg: 'rgba(245,158,11,.15)'  },
-  long:  { label: 'Long Run',  color: '#10B981', bg: 'rgba(16,185,129,.15)'  },
+  easy:  { label: 'EASY Z2',   color: '#3B82F6', bg: 'rgba(59,130,246,.15)'  },
+  vest:  { label: 'VEST',      color: '#EC4899', bg: 'rgba(236,72,153,.15)'  },
+  speed: { label: 'SPEED',     color: '#F59E0B', bg: 'rgba(245,158,11,.15)'  },
+  long:  { label: 'LONG RUN',  color: '#10B981', bg: 'rgba(16,185,129,.15)'  },
   b2b:   { label: 'B2B',       color: '#8B5CF6', bg: 'rgba(139,92,246,.15)'  },
-  race:  { label: 'Race',      color: '#EF4444', bg: 'rgba(239,68,68,.15)'   },
-  gym:   { label: 'Gym',       color: '#06B6D4', bg: 'rgba(6,182,212,.15)'   },
-  rest:  { label: 'Rest',      color: '#6B7280', bg: 'rgba(107,114,128,.15)' },
+  race:  { label: 'RACE',      color: '#EF4444', bg: 'rgba(239,68,68,.15)'   },
+  gym:   { label: 'GYM',       color: '#06B6D4', bg: 'rgba(6,182,212,.15)'   },
+  rest:  { label: 'REST',      color: '#6B7280', bg: 'rgba(107,114,128,.15)' },
 };
 
 export function wkRange(startDate, wkIdx) {

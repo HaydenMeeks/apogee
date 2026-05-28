@@ -87,8 +87,8 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
 
         {/* ── HERO HEADER ── */}
         <div style={{flexShrink:0, position:'relative', overflow:'hidden',
-          background: `linear-gradient(135deg, ${tc.color}28 0%, ${tc.color}08 60%, var(--bg) 100%)`,
-          borderBottom:`1px solid ${tc.color}30`,
+          background: `linear-gradient(135deg, ${tc.color}20 0%, ${tc.color}08 60%, var(--bg) 100%)`,
+          borderBottom:`1px solid ${tc.color}25`,
           minHeight: 160,
         }}>
           {/* Decorative background shape */}
@@ -105,7 +105,7 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
 
           {/* Nav row */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 16px 0',position:'relative',zIndex:1}}>
-            <button onClick={onBack} style={{display:'flex',alignItems:'center',gap:6,background:'rgba(0,0,0,0.25)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:20,padding:'6px 12px 6px 8px',color:'var(--text)',fontSize:13,fontWeight:500,cursor:'pointer',backdropFilter:'blur(8px)'}}>
+            <button onClick={onBack} style={{display:'flex',alignItems:'center',gap:6,background:'var(--card)',border:'1px solid var(--border)',borderRadius:20,padding:'6px 12px 6px 8px',color:'var(--text)',fontSize:13,fontWeight:500,cursor:'pointer'}}>
               ← Week {wkIdx+1}
             </button>
             {isDone&&<div style={{background:'var(--green)',color:'#0A0A0A',borderRadius:20,padding:'5px 12px',fontSize:11,fontFamily:'Exo 2, sans-serif',fontWeight:700,letterSpacing:1}}>✓ DONE</div>}
@@ -261,7 +261,7 @@ export default function SessionDetail({ session:s, wkIdx, plan, completion, gymL
 }
 
 function Pill({color,bg,children}){return<span style={{fontSize:10,fontFamily:'Exo 2, sans-serif',padding:'3px 8px',borderRadius:5,background:bg,color,fontWeight:700,letterSpacing:1}}>{children}</span>;}
-function StatChip({label,val,color}){return<div style={{background:'rgba(0,0,0,0.25)',border:`1px solid ${color||'rgba(255,255,255,0.1)'}40`,borderRadius:10,padding:'9px 12px',flexShrink:0,minWidth:80,backdropFilter:'blur(8px)'}}><div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:color||'rgba(244,244,242,0.4)',letterSpacing:2,marginBottom:4,opacity:0.7}}>{label}</div><div style={{fontSize:14,fontWeight:700,color:'var(--text)'}}>{val}</div></div>;}
+function StatChip({label,val,color}){return<div style={{background:'var(--card)',border:`1px solid var(--border)`,borderRadius:10,padding:'9px 12px',flexShrink:0,minWidth:80}}><div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:color||'var(--muted)',letterSpacing:2,marginBottom:4,fontWeight:600}}>{label}</div><div style={{fontSize:14,fontWeight:700,color:'var(--text)'}}>{val}</div></div>;}
 function LInput({label,val,set,type='text',placeholder,step}){
   return<div><label style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>{label}</label>
     <input type={type} value={val} onChange={e=>set(e.target.value)} placeholder={placeholder} step={step} style={{width:'100%',background:'var(--surface)',border:'1.5px solid var(--border)',borderRadius:8,color:'var(--text)',fontFamily:'Exo 2, sans-serif',fontSize:16,padding:'9px 10px',outline:'none'}}/>
