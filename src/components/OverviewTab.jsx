@@ -22,11 +22,15 @@ export default function OverviewTab({ plan, completions }) {
 
   // Build km data
   const wkData = plan.weeks.map((w,idx) => {
-    const gymHrs = w.sessions.filter(s=>s.isGym).reduce((a,s)=>a+(s.hrs||0),0);
-    const aetHrs = w.sessions.filter(s=>s.name?.includes('AeT Retest')).reduce((a,s)=>a+(s.hrs||0),0);
-    const runHrs = Math.max(0,(w.targets?.hrs||0)-gymHrs-aetHrs);
+    // Calculate km from actual session minutes (mid-range pace estimate)
+    let runMins = 0;
     const raceKm = w.sessions.filter(s=>s.type==='race').reduce((a,s)=>a+(s.km||0),0);
-    const km = Math.round(runHrs*10.5)+raceKm;
+    w.sessions.forEach(s => {
+      if (s.isGym || s.type === 'vest' || s.type === 'race') return;
+      const m = (s.target||'').match(/^(\d+)min/);
+      if (m) runMins += parseInt(m[1]);
+    });
+    const km = Math.round(runMins / 60 * 9.5) + raceKm;
     const ws = new Date(start.getTime()+idx*7*86400000);
     return {
       wk:w.week, km, hasRace:w.sessions.some(s=>s.type==='race'),
