@@ -19,13 +19,13 @@ export default function PlanModal({ plan, completions, onClose, loadPlan, resetP
             <div style={{ fontSize:18, fontWeight:800, letterSpacing:'-.4px', marginBottom:14 }}>Training Plan</div>
             <div style={{ background:'var(--card)', border:'1px solid var(--border)', borderRadius:12, padding:14, marginBottom:14 }}>
               <div style={{ fontSize:15, fontWeight:800, marginBottom:3 }}>{plan?.meta?.name || 'Training Plan'}</div>
-              <div style={{ fontFamily:'DM Mono,monospace', fontSize:10, color:'var(--muted)', marginBottom:10 }}>
+              <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--muted)', marginBottom:10 }}>
                 Week {getCurWk(plan) + 1} of {plan?.weeks.length} · Started {plan?.meta?.startDate ? new Date(plan.meta.startDate).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }) : '—'}
               </div>
               <div style={{ height:4, background:'var(--border)', borderRadius:2, overflow:'hidden', marginBottom:4 }}>
                 <div style={{ width:`${pct}%`, height:'100%', background:'var(--green)', borderRadius:2 }}/>
               </div>
-              <div style={{ display:'flex', justifyContent:'space-between', fontFamily:'DM Mono,monospace', fontSize:9, color:'var(--muted)' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', fontFamily:'Exo 2, sans-serif', fontSize:10, color:'var(--muted)' }}>
                 <span>{doneS}/{totalS} sessions done</span><span>{pct}%</span>
               </div>
             </div>
