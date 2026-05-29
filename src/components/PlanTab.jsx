@@ -63,8 +63,20 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
   let logHrs = 0, logKm = 0;
   w.sessions.forEach(s => {
     const c = completions[`${curWk}_${s.id}`];
-    if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1]) / 60 : parseFloat(p[0]) || 0; }
-    if (c?.dist) logKm += parseFloat(c.dist) || 0;
+    if (!c?.done) return;
+    if (s.isGym) {
+      // Use prescribed session duration for gym completions
+      const m = (s.target||'').match(/~?(\d+)min/);
+      if (m) logHrs += parseInt(m[1]) / 60;
+    } else if (s.type === 'vest') {
+      // Use logged time if available, otherwise prescribed
+      if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1]) / 60 : parseFloat(p[0]) / 60 || 0; }
+      else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1]) / 60; }
+    } else {
+      if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1]) / 60 : parseFloat(p[0]) || 0; }
+      else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1]) / 60; }
+      if (c?.dist) logKm += parseFloat(c.dist) || 0;
+    }
   });
   const hrsPct = tHrs > 0 ? Math.min(100, Math.round((logHrs / tHrs) * 100)) : 0;
   const runsDone = runs.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
