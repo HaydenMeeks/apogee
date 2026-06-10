@@ -32,7 +32,7 @@ export default function Shell(props) {
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 60,
         background: 'var(--surface)', backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255,255,255,0.08)',
+        borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '10px 16px',
         paddingTop: 'calc(10px + env(safe-area-inset-top, 0px))',
@@ -74,7 +74,7 @@ export default function Shell(props) {
         position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 201,
         width: 280,
         background: 'var(--surface)',
-        borderRight: '1px solid rgba(255,255,255,0.08)',
+        borderRight: '1px solid var(--border)',
         display: 'flex', flexDirection: 'column',
         transform: drawerOpen ? 'translateX(0)' : 'translateX(-100%)',
         transition: 'transform .28s cubic-bezier(.4,0,.2,1)',
@@ -82,9 +82,9 @@ export default function Shell(props) {
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}>
         {/* Drawer header */}
-        <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <ShieldIcon size={36}/>
-          <button onClick={closeDrawer} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.06)', border: 'none', color: 'var(--muted)', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+          <button onClick={closeDrawer} style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--card2)', border: 'none', color: 'var(--muted)', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
         </div>
 
         {/* Race countdowns */}
@@ -129,7 +129,7 @@ export default function Shell(props) {
         </nav>
 
         {/* Bottom — settings */}
-        <div style={{ padding: '12px 12px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ padding: '12px 12px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {syncing && <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 2, padding: '4px 14px' }}>SYNCING…</div>}
           <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
@@ -151,7 +151,7 @@ export default function Shell(props) {
           </div>
           <button onClick={() => { setPlanModal(true); closeDrawer(); }} style={{
             padding: '10px 14px', borderRadius: 9,
-            background: 'var(--card)', border: '1px solid rgba(255,255,255,0.08)',
+            background: 'var(--card)', border: '1px solid var(--border)',
             color: 'var(--muted)', fontSize: 11, fontWeight: 600,
             fontFamily: 'Exo 2, sans-serif', letterSpacing: 1, cursor: 'pointer', width: '100%', textAlign: 'left',
           }}>
@@ -169,8 +169,8 @@ export default function Shell(props) {
       </div>
 
       {/* ── DESKTOP SIDEBAR ── */}
-      <aside className="desk-sidebar" style={{ display: 'none', width: 260, flexShrink: 0, background: 'var(--surface)', borderRight: '1px solid rgba(255,255,255,0.08)', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50 }}>
-        <div style={{ padding: '26px 20px 18px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <aside className="desk-sidebar" style={{ display: 'none', width: 260, flexShrink: 0, background: 'var(--surface)', borderRight: '1px solid var(--border)', flexDirection: 'column', position: 'fixed', top: 0, left: 0, bottom: 0, zIndex: 50 }}>
+        <div style={{ padding: '26px 20px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12 }}>
           <ShieldIcon size={32}/>
           {syncing && <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 2, marginLeft: 'auto' }}>SYNCING…</div>}
         </div>
@@ -196,7 +196,7 @@ export default function Shell(props) {
             Coach
           </button>
         </nav>
-        <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ padding: '12px 14px', borderTop: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 6 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px' }}>
             <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 1 }}>
               {theme === 'dark' ? '🌙  DARK' : '☀️  LIGHT'}
@@ -215,7 +215,7 @@ export default function Shell(props) {
               }}/>
             </button>
           </div>
-          <button onClick={() => setPlanModal(true)} style={{ width: '100%', background: 'var(--card)', border: '1px solid rgba(255,255,255,0.14)', color: 'rgba(244,244,242,0.6)', fontSize: 10, fontWeight: 600, padding: '9px 12px', borderRadius: 8, fontFamily: 'Exo 2, sans-serif', letterSpacing: 1, cursor: 'pointer' }}>
+          <button onClick={() => setPlanModal(true)} style={{ width: '100%', background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 10, fontWeight: 600, padding: '9px 12px', borderRadius: 8, fontFamily: 'Exo 2, sans-serif', letterSpacing: 1, cursor: 'pointer' }}>
             MANAGE PLAN
           </button>
           <button onClick={() => signOut()} style={{ width: '100%', background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 11, cursor: 'pointer', fontFamily: 'Exo 2, sans-serif', letterSpacing: 1 }}>

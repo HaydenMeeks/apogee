@@ -16,7 +16,18 @@ export default function OverviewTab({ plan, completions }) {
   const curWk = getCurWk(plan);
   const totalS = plan.weeks.reduce((a,w)=>a+w.sessions.length,0);
   const doneS = Object.values(completions).filter(c=>c?.done).length;
-  const totalHrs = plan.weeks.reduce((a,w)=>a+(w.targets?.hrs||0),0);
+  // Calculate hours from targets.hrs if set, otherwise sum session target minutes
+  function calcWeekHrs(w) {
+    if (w.targets?.hrs) return w.targets.hrs;
+    let mins = 0;
+    w.sessions.forEach(s => {
+      if (s.hrs) { mins += s.hrs * 60; return; }
+      const m = (s.target||'').match(/^~?(\d+)min/);
+      if (m) mins += parseInt(m[1]);
+    });
+    return Math.round((mins / 60) * 10) / 10;
+  }
+  const totalHrs = plan.weeks.reduce((a,w)=>a+calcWeekHrs(w),0);
   const start = new Date(plan.meta.startDate);
   const races = plan.meta.races || [];
 
@@ -35,7 +46,7 @@ export default function OverviewTab({ plan, completions }) {
     return {
       wk:w.week, km, hasRace:w.sessions.some(s=>s.type==='race'),
       hasAet:w.sessions.some(s=>s.name?.includes('AeT Retest')),
-      phase:w.phase||'', hrs:w.targets?.hrs||0, isCur:idx===curWk,
+      phase:w.phase||'', hrs:calcWeekHrs(w), isCur:idx===curWk,
       date:ws.toLocaleDateString('en-AU',{day:'numeric',month:'short'}),
     };
   });
@@ -125,7 +136,7 @@ export default function OverviewTab({ plan, completions }) {
   plan.weeks.forEach(w=>{
     const ph=(w.phase||'').split('·')[0].trim()||'Other';
     if(!phases[ph])phases[ph]={weeks:0,hrs:0};
-    phases[ph].weeks++;phases[ph].hrs+=(w.targets?.hrs||0);
+    phases[ph].weeks++;phases[ph].hrs+=calcWeekHrs(w);
   });
 
   return (
