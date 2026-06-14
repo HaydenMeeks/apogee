@@ -271,8 +271,8 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
     { val:`${runsDone}/${runs.length}`, lbl:'RUNS', hit:runs.length>0&&runsDone===runs.length, tap:null },
     { val:`${gymsDone}/${gyms.length}`, lbl:'GYM',  hit:gyms.length>0&&gymsDone===gyms.length, tap:null },
     isAccumulated
-      ? { val: totalEasyMins > 0 ? `${totalEasyMins}` : easyTarget > 0 ? `${easyTarget}` : '—',
-          lbl: totalEasyMins > 0 ? 'EASY MIN' : 'MIN TARGET',
+      ? { val: easyTarget > 0 ? `${easyTarget}` : '—',
+          lbl: 'MIN TARGET',
           hit: easyHit, tap: () => setShowEasyModal(true), isEasy: true }
       : { val: logHrs>0 ? logHrs.toFixed(1) : (w.targets?.hrs||'—'),
           lbl: logHrs>0 ? 'HRS DONE' : 'HRS TARGET',
@@ -324,7 +324,6 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
         {/* KPI Cards */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginBottom:10}}>
           {kpiCards.map((k,i)=>{
-            const isEasyCard = k.isEasy;
             const card = (
               <div style={{
                 background:'var(--card)',
@@ -336,11 +335,6 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
               }}>
                 <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:20,lineHeight:1,color:k.hit?'var(--green)':'var(--text)'}}>{k.val}</div>
                 <div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:.5,marginTop:3}}>{k.lbl}</div>
-                {isEasyCard && easyTarget > 0 && (
-                  <div style={{marginTop:5,height:2,background:'var(--border)',borderRadius:1,overflow:'hidden'}}>
-                    <div style={{width:`${easyPct}%`,height:'100%',background:'var(--green)',borderRadius:1,transition:'width .5s ease'}}/>
-                  </div>
-                )}
                 {k.tap && (
                   <div style={{position:'absolute',top:4,right:6,fontFamily:'Exo 2, sans-serif',fontSize:8,color:'var(--green)',opacity:0.7}}>+</div>
                 )}
@@ -354,28 +348,42 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
 
         {/* Progress bars */}
         <div style={{marginBottom:2}}>
-          <div style={{display:'flex',justifyContent:'space-between',fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginBottom:3}}>
-            <span>{done}/{nonRest.length} sessions</span><span>{pct}%</span>
-          </div>
-          <div style={{height:3,background:'var(--border)',borderRadius:2,overflow:'hidden',marginBottom:6}}>
-            <div style={{width:`${pct}%`,height:'100%',background:'var(--green)',borderRadius:2,transition:'width .5s ease'}}/>
-          </div>
-          {isAccumulated && easyTarget > 0 && <>
-            <div style={{display:'flex',justifyContent:'space-between',fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginBottom:3}}>
-              <span>Easy mins</span><span>{totalEasyMins}/{easyTarget}min</span>
-            </div>
-            <div style={{height:3,background:'var(--border)',borderRadius:2,overflow:'hidden'}}>
-              <div style={{width:`${easyPct}%`,height:'100%',background:'var(--green)',borderRadius:2,opacity:.8,transition:'width .5s ease'}}/>
-            </div>
-          </>}
-          {!isAccumulated && tHrs>0 && <>
-            <div style={{display:'flex',justifyContent:'space-between',fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginBottom:3}}>
-              <span>Hours</span><span>{logHrs.toFixed(1)}/{tHrs}hrs</span>
-            </div>
-            <div style={{height:3,background:'var(--border)',borderRadius:2,overflow:'hidden'}}>
-              <div style={{width:`${hrsPct}%`,height:'100%',background:'var(--easy)',borderRadius:2,opacity:.8,transition:'width .5s ease'}}/>
-            </div>
-          </>}
+          {isAccumulated ? (
+            /* Accumulated plan — easy minutes bar only, prominent */
+            <>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',fontFamily:'Exo 2, sans-serif',fontSize:11,marginBottom:5}}>
+                <span style={{color:'var(--muted)'}}>Easy mins this week</span>
+                <span style={{color:easyHit?'var(--green)':'var(--text)',fontWeight:700}}>
+                  {totalEasyMins}<span style={{color:'var(--muted)',fontWeight:400}}>/{easyTarget}min</span>
+                  {easyHit && <span style={{color:'var(--green)',marginLeft:6}}>✓</span>}
+                </span>
+              </div>
+              <div style={{height:6,background:'var(--border)',borderRadius:3,overflow:'hidden'}}>
+                <div style={{width:`${easyPct}%`,height:'100%',background:'var(--green)',borderRadius:3,transition:'width .5s ease'}}/>
+              </div>
+              <div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginTop:5,textAlign:'right'}}>
+                {easyPct}% · tap card to log
+              </div>
+            </>
+          ) : (
+            /* Checklist plan — session progress + hrs */
+            <>
+              <div style={{display:'flex',justifyContent:'space-between',fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginBottom:3}}>
+                <span>{done}/{nonRest.length} sessions</span><span>{pct}%</span>
+              </div>
+              <div style={{height:3,background:'var(--border)',borderRadius:2,overflow:'hidden',marginBottom:6}}>
+                <div style={{width:`${pct}%`,height:'100%',background:'var(--green)',borderRadius:2,transition:'width .5s ease'}}/>
+              </div>
+              {tHrs>0&&<>
+                <div style={{display:'flex',justifyContent:'space-between',fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginBottom:3}}>
+                  <span>Hours</span><span>{logHrs.toFixed(1)}/{tHrs}hrs</span>
+                </div>
+                <div style={{height:3,background:'var(--border)',borderRadius:2,overflow:'hidden'}}>
+                  <div style={{width:`${hrsPct}%`,height:'100%',background:'var(--easy)',borderRadius:2,opacity:.8,transition:'width .5s ease'}}/>
+                </div>
+              </>}
+            </>
+          )}
         </div>
       </div>
 
