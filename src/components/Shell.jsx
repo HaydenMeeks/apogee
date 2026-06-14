@@ -112,7 +112,6 @@ export default function Shell(props) {
               fontSize: 15, fontWeight: tab === n.id ? 700 : 500,
               textAlign: 'left', width: '100%', border: 'none', cursor: 'pointer',
               transition: 'all .15s',
-              opacity: tab === n.id ? 1 : 0.8,
             }}>
               {n.label}
             </button>
@@ -188,7 +187,7 @@ export default function Shell(props) {
         )}
         <nav style={{ padding: '12px 10px', flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
           {NAV.map(n => (
-            <button key={n.id} onClick={() => setTab(n.id)} style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderRadius: 8, background: tab === n.id ? 'var(--green)' : 'transparent', color: tab === n.id ? '#0A0A0A' : 'rgba(244,244,242,0.85)', fontSize: 14, fontWeight: 500, textAlign: 'left', width: '100%', border: 'none', cursor: 'pointer', transition: 'all .15s' }}>
+            <button key={n.id} onClick={() => setTab(n.id)} style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderRadius: 8, background: tab === n.id ? 'var(--green)' : 'transparent', color: tab === n.id ? '#0A0A0A' : 'var(--text)', fontSize: 14, fontWeight: 500, textAlign: 'left', width: '100%', border: 'none', cursor: 'pointer', transition: 'all .15s' }}>
               {n.label}
             </button>
           ))}
