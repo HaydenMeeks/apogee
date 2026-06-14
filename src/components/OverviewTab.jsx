@@ -19,9 +19,10 @@ export default function OverviewTab({ plan, completions }) {
   // Calculate hours from targets.hrs if set, otherwise sum session target minutes
   function calcWeekHrs(w) {
     if (w.targets?.hrs) return w.targets.hrs;
+    const runTypes = ['easy','long','b2b','speed','vest','race'];
     let mins = 0;
     w.sessions.forEach(s => {
-      if (s.hrs) { mins += s.hrs * 60; return; }
+      if (!runTypes.includes(s.type)) return;
       const m = (s.target||'').match(/^~?(\d+)min/);
       if (m) mins += parseInt(m[1]);
     });
@@ -38,7 +39,7 @@ export default function OverviewTab({ plan, completions }) {
     const raceKm = w.sessions.filter(s=>s.type==='race').reduce((a,s)=>a+(s.km||0),0);
     w.sessions.forEach(s => {
       if (s.isGym || s.type === 'vest' || s.type === 'race') return;
-      const m = (s.target||'').match(/^(\d+)min/);
+      const m = (s.target||'').match(/^~?(\d+)min/);
       if (m) runMins += parseInt(m[1]);
     });
     const km = Math.round(runMins / 60 * 9.5) + raceKm;

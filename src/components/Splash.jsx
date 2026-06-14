@@ -186,14 +186,14 @@ export default function Splash({ plan, onEnter }) {
           </div>
         </div>
 
-        {/* Race countdown — GPT only */}
+        {/* Race countdown — pulled from plan races */}
         {races.length >= 1 && (
           <div className="cta-wrap" style={{ textAlign:'center', zIndex:2 }}>
             <div style={{ fontFamily:'Archivo Black,sans-serif', fontSize:48, color:'#00C46A', lineHeight:1, textShadow:'0 0 20px rgba(0,196,106,.5)' }}>
               {daysTo(races[races.length - 1].date)}
             </div>
             <div style={{ fontFamily:'Exo 2, sans-serif', fontSize:10, color:'rgba(244,244,242,.35)', letterSpacing:3, marginTop:5 }}>
-              DAYS TO GPT100
+              DAYS TO {(races[races.length - 1].name || 'RACE').toUpperCase().replace(' ·', '').split('·')[0].trim()}
             </div>
           </div>
         )}
