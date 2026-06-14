@@ -2,9 +2,157 @@ import React, { useState } from 'react';
 import { wkRange, getCurWk, SESSION_TYPES } from '../utils.js';
 import SessionDetail from './SessionDetail.jsx';
 
-export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, tickSession, untickSession, completeWorkout, saveGymLog, setPlanModal, history, setHistory, user }) {
+// ── EASY MINUTES LOG MODAL ─────────────────────────────────────────────────
+function EasyMinutesModal({ week, weekIdx, easyTarget, easyLogs, onLog, onDelete, onClose }) {
+  const [mins, setMins] = useState('');
+  const [km, setKm] = useState('');
+
+  const totalLogged = easyLogs.reduce((a, l) => a + (parseInt(l.mins) || 0), 0);
+  const pct = easyTarget > 0 ? Math.min(100, Math.round((totalLogged / easyTarget) * 100)) : 0;
+  const hit = totalLogged >= easyTarget;
+
+  function handleLog() {
+    if (!mins || parseInt(mins) <= 0) return;
+    onLog({ mins: parseInt(mins), km: parseFloat(km) || 0, date: new Date().toISOString() });
+    setMins(''); setKm('');
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 300,
+      background: 'rgba(0,0,0,0.7)', display: 'flex',
+      alignItems: 'flex-end', backdropFilter: 'blur(4px)',
+    }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{
+        width: '100%', background: 'var(--card)',
+        borderRadius: '20px 20px 0 0', padding: '20px 16px',
+        paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+        maxHeight: '85vh', overflowY: 'auto',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 3 }}>WEEK {week}</div>
+            <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 20, color: 'var(--text)', marginTop: 2 }}>Easy Minutes</div>
+          </div>
+          <button onClick={onClose} style={{
+            width: 36, height: 36, borderRadius: '50%', background: 'var(--surface)',
+            border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+          }}>✕</button>
+        </div>
+
+        {/* Progress */}
+        <div style={{
+          background: 'var(--surface)', border: `1px solid ${hit ? 'var(--green)' : 'var(--border)'}`,
+          borderRadius: 12, padding: '14px 16px', marginBottom: 16,
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+            <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 32, color: hit ? 'var(--green)' : 'var(--text)', lineHeight: 1 }}>
+              {totalLogged}<span style={{ fontSize: 14, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 }}>min</span>
+            </div>
+            <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 11, color: 'var(--muted)' }}>
+              {hit ? '✓ TARGET HIT' : `${easyTarget - totalLogged}min to go`}
+            </div>
+          </div>
+          <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{
+              width: `${pct}%`, height: '100%',
+              background: hit ? 'var(--green)' : '#00C46A',
+              borderRadius: 3, transition: 'width 0.5s ease',
+            }}/>
+          </div>
+          <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: 6, textAlign: 'right' }}>
+            TARGET: {easyTarget}min
+          </div>
+        </div>
+
+        {/* Log form */}
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 14, marginBottom: 16 }}>
+          <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 3, marginBottom: 12 }}>LOG EASY RUN</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
+            <div>
+              <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 2, marginBottom: 4 }}>MINUTES</div>
+              <input
+                type="number" value={mins} onChange={e => setMins(e.target.value)}
+                placeholder="60" inputMode="numeric"
+                style={{
+                  width: '100%', background: 'var(--card)', border: '1px solid var(--border)',
+                  borderRadius: 8, color: 'var(--text)', fontSize: 18,
+                  fontFamily: 'Archivo Black, sans-serif', padding: '10px 12px', outline: 'none',
+                }}
+              />
+            </div>
+            <div>
+              <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 2, marginBottom: 4 }}>KM (optional)</div>
+              <input
+                type="number" value={km} onChange={e => setKm(e.target.value)}
+                placeholder="—" inputMode="decimal" step="0.1"
+                style={{
+                  width: '100%', background: 'var(--card)', border: '1px solid var(--border)',
+                  borderRadius: 8, color: 'var(--text)', fontSize: 18,
+                  fontFamily: 'Archivo Black, sans-serif', padding: '10px 12px', outline: 'none',
+                }}
+              />
+            </div>
+          </div>
+          <button onClick={handleLog} style={{
+            width: '100%', background: mins ? 'var(--green)' : 'var(--border)',
+            color: mins ? '#0A0A0A' : 'var(--muted)', border: 'none',
+            borderRadius: 10, padding: 13, fontSize: 14, fontWeight: 800, cursor: mins ? 'pointer' : 'default',
+            transition: 'background 0.2s',
+          }}>
+            + Log Run
+          </button>
+        </div>
+
+        {/* History */}
+        {easyLogs.length > 0 && (
+          <div>
+            <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 3, marginBottom: 10 }}>THIS WEEK</div>
+            {[...easyLogs].reverse().map((log, i) => (
+              <div key={log.id || i} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 12px', background: 'var(--surface)', border: '1px solid var(--border)',
+                borderRadius: 10, marginBottom: 8,
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }}/>
+                  <div>
+                    <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 16, color: 'var(--text)', lineHeight: 1 }}>
+                      {log.mins}min
+                      {log.km > 0 && <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 11, color: 'var(--muted)', fontWeight: 400, marginLeft: 6 }}>{log.km.toFixed(1)}km</span>}
+                    </div>
+                    <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>
+                      {new Date(log.date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    </div>
+                  </div>
+                </div>
+                <button onClick={() => onDelete(log.id)} style={{
+                  width: 28, height: 28, borderRadius: '50%', background: 'transparent',
+                  border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 12,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+                }}>✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {easyLogs.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--muted)', fontFamily: 'Exo 2, sans-serif', fontSize: 11, letterSpacing: 1 }}>
+            NO RUNS LOGGED YET THIS WEEK
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN COMPONENT ─────────────────────────────────────────────────────────
+export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, tickSession, untickSession, completeWorkout, saveGymLog, setPlanModal, history, setHistory, user, easyLogs, logEasyRun, deleteEasyLog }) {
   const [detailSession, setDetailSession] = useState(null);
   const [celebrating, setCelebrating] = useState(false);
+  const [showEasyModal, setShowEasyModal] = useState(false);
   const [extraLog, setExtraLog] = useState(false);
   const [extraType, setExtraType] = useState('easy');
   const [extraTime, setExtraTime] = useState('');
@@ -53,6 +201,15 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
 
   const w = plan.weeks[curWk];
   const isCurrent = curWk === getCurWk(plan);
+  const isAccumulated = plan.meta?.volumeTracking === 'accumulated_minutes';
+  const easyTarget = w.easyMinutesTarget || 0;
+
+  // Easy logs for this week
+  const weekEasyLogs = (easyLogs || []).filter(l => l.weekIdx === curWk);
+  const totalEasyMins = weekEasyLogs.reduce((a, l) => a + (parseInt(l.mins) || 0), 0);
+  const easyPct = easyTarget > 0 ? Math.min(100, Math.round((totalEasyMins / easyTarget) * 100)) : 0;
+  const easyHit = easyTarget > 0 && totalEasyMins >= easyTarget;
+
   const runs = w.sessions.filter(s => !s.isGym && s.type !== 'vest');
   const vests = w.sessions.filter(s => s.type === 'vest');
   const gyms = w.sessions.filter(s => s.isGym);
@@ -60,34 +217,36 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
   const done = nonRest.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
   const pct = nonRest.length > 0 ? Math.round((done / nonRest.length) * 100) : 0;
   const tHrs = parseFloat(w.targets?.hrs || 0);
+
   let logHrs = 0, logKm = 0;
   w.sessions.forEach(s => {
     const c = completions[`${curWk}_${s.id}`];
     if (!c?.done) return;
     if (s.isGym) {
-      // Use prescribed session duration for gym completions
       const m = (s.target||'').match(/~?(\d+)min/);
       if (m) logHrs += parseInt(m[1]) / 60;
     } else if (s.type === 'vest') {
-      // Use logged time if available, otherwise prescribed
-      if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1]) / 60 : parseFloat(p[0]) / 60 || 0; }
-      else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1]) / 60; }
+      if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1])/60 : parseFloat(p[0])/60||0; }
+      else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1])/60; }
     } else {
-      if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1]) / 60 : parseFloat(p[0]) || 0; }
-      else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1]) / 60; }
-      if (c?.dist) logKm += parseFloat(c.dist) || 0;
+      if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1])/60 : parseFloat(p[0])||0; }
+      else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1])/60; }
+      if (c?.dist) logKm += parseFloat(c.dist)||0;
     }
   });
-  const hrsPct = tHrs > 0 ? Math.min(100, Math.round((logHrs / tHrs) * 100)) : 0;
+  // For accumulated plans, also count easy logs toward hrs
+  if (isAccumulated) logHrs += totalEasyMins / 60;
+
+  const hrsPct = tHrs > 0 ? Math.min(100, Math.round((logHrs/tHrs)*100)) : 0;
   const runsDone = runs.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
   const gymsDone = gyms.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
 
   const RUN_TYPES = [
-    { val: 'easy',  label: 'Easy Z2'  },
-    { val: 'long',  label: 'Long Run' },
-    { val: 'b2b',   label: 'B2B'      },
-    { val: 'speed', label: 'Speed'    },
-    { val: 'vest',  label: 'Vest'     },
+    { val:'easy', label:'Easy Z2' },
+    { val:'long', label:'Long Run' },
+    { val:'b2b',  label:'B2B' },
+    { val:'speed',label:'Speed' },
+    { val:'vest', label:'Vest' },
   ];
 
   const logExtra = () => {
@@ -100,12 +259,26 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
       sessionType: extraType,
       date: new Date().toISOString(),
       time: `${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')}`,
-      dist: extraDist || '',
-      notes: '',
+      dist: extraDist || '', notes: '',
     };
     setHistory(prev => [entry, ...prev]);
     setExtraLog(false); setExtraTime(''); setExtraDist('');
   };
+
+  // ── KPI CARDS ──────────────────────────────────────────────────────────
+  // Third card: accumulated plan = easy minutes tappable | other = hrs
+  const kpiCards = [
+    { val:`${runsDone}/${runs.length}`, lbl:'RUNS', hit:runs.length>0&&runsDone===runs.length, tap:null },
+    { val:`${gymsDone}/${gyms.length}`, lbl:'GYM',  hit:gyms.length>0&&gymsDone===gyms.length, tap:null },
+    isAccumulated
+      ? { val: totalEasyMins > 0 ? `${totalEasyMins}` : easyTarget > 0 ? `${easyTarget}` : '—',
+          lbl: totalEasyMins > 0 ? 'EASY MIN' : 'MIN TARGET',
+          hit: easyHit, tap: () => setShowEasyModal(true), isEasy: true }
+      : { val: logHrs>0 ? logHrs.toFixed(1) : (w.targets?.hrs||'—'),
+          lbl: logHrs>0 ? 'HRS DONE' : 'HRS TARGET',
+          hit: logHrs>0, tap: null },
+    { val: logKm>0 ? logKm.toFixed(0)+'km' : '—', lbl:'KM DONE', hit:logKm>0, tap:null },
+  ];
 
   return (
     <div style={{padding:'0 0 24px'}}>
@@ -148,19 +321,35 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
 
         <div style={{fontSize:14,fontWeight:600,letterSpacing:'-.2px',marginBottom:12,color:'var(--text2)'}}>{w.phase}</div>
 
-        {/* KPI: Runs · Gym · Hrs · Km */}
+        {/* KPI Cards */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:6,marginBottom:10}}>
-          {[
-            {val:`${runsDone}/${runs.length}`, lbl:'RUNS',       hit:runs.length>0&&runsDone===runs.length},
-            {val:`${gymsDone}/${gyms.length}`, lbl:'GYM',        hit:gyms.length>0&&gymsDone===gyms.length},
-            {val:logHrs>0?logHrs.toFixed(1):(w.targets?.hrs||'—'), lbl:logHrs>0?'HRS DONE':'HRS TARGET', hit:logHrs>0},
-            {val:logKm>0?logKm.toFixed(0)+'km':'—',              lbl:'KM DONE',   hit:logKm>0},
-          ].map((k,i)=>(
-            <div key={i} style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 8px'}}>
-              <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:20,lineHeight:1,color:k.hit?'var(--green)':'var(--text)'}}>{k.val}</div>
-              <div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:.5,marginTop:3}}>{k.lbl}</div>
-            </div>
-          ))}
+          {kpiCards.map((k,i)=>{
+            const isEasyCard = k.isEasy;
+            const card = (
+              <div style={{
+                background:'var(--card)',
+                border:`1px solid ${k.hit?'var(--green)':'var(--border)'}`,
+                borderRadius:10, padding:'10px 8px',
+                cursor: k.tap ? 'pointer' : 'default',
+                position: 'relative',
+                transition: 'border-color 0.2s',
+              }}>
+                <div style={{fontFamily:'Archivo Black,sans-serif',fontSize:20,lineHeight:1,color:k.hit?'var(--green)':'var(--text)'}}>{k.val}</div>
+                <div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:.5,marginTop:3}}>{k.lbl}</div>
+                {isEasyCard && easyTarget > 0 && (
+                  <div style={{marginTop:5,height:2,background:'var(--border)',borderRadius:1,overflow:'hidden'}}>
+                    <div style={{width:`${easyPct}%`,height:'100%',background:'var(--green)',borderRadius:1,transition:'width .5s ease'}}/>
+                  </div>
+                )}
+                {k.tap && (
+                  <div style={{position:'absolute',top:4,right:6,fontFamily:'Exo 2, sans-serif',fontSize:8,color:'var(--green)',opacity:0.7}}>+</div>
+                )}
+              </div>
+            );
+            return k.tap
+              ? <button key={i} onClick={k.tap} style={{all:'unset',display:'block'}}>{card}</button>
+              : <div key={i}>{card}</div>;
+          })}
         </div>
 
         {/* Progress bars */}
@@ -171,7 +360,15 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
           <div style={{height:3,background:'var(--border)',borderRadius:2,overflow:'hidden',marginBottom:6}}>
             <div style={{width:`${pct}%`,height:'100%',background:'var(--green)',borderRadius:2,transition:'width .5s ease'}}/>
           </div>
-          {tHrs>0&&<>
+          {isAccumulated && easyTarget > 0 && <>
+            <div style={{display:'flex',justifyContent:'space-between',fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginBottom:3}}>
+              <span>Easy mins</span><span>{totalEasyMins}/{easyTarget}min</span>
+            </div>
+            <div style={{height:3,background:'var(--border)',borderRadius:2,overflow:'hidden'}}>
+              <div style={{width:`${easyPct}%`,height:'100%',background:'var(--green)',borderRadius:2,opacity:.8,transition:'width .5s ease'}}/>
+            </div>
+          </>}
+          {!isAccumulated && tHrs>0 && <>
             <div style={{display:'flex',justifyContent:'space-between',fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',marginBottom:3}}>
               <span>Hours</span><span>{logHrs.toFixed(1)}/{tHrs}hrs</span>
             </div>
@@ -206,47 +403,56 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
           ))}
         </>}
 
-        {/* Log extra run */}
-        <div style={{marginTop:12}}>
-          <button onClick={()=>setExtraLog(!extraLog)} style={{width:'100%',background:'transparent',border:'1px dashed var(--border)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--muted)',cursor:'pointer',fontFamily:'Exo 2, sans-serif',letterSpacing:1}}>
-            + LOG EXTRA RUN
-          </button>
-          {extraLog&&(
-            <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:14,marginTop:8}}>
-              <div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:3,marginBottom:10}}>EXTRA RUN</div>
-              {/* Type pills */}
-              <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12}}>
-                {RUN_TYPES.map(t=>{
-                  const tc = SESSION_TYPES[t.val] || SESSION_TYPES.easy;
-                  const active = extraType === t.val;
-                  return(
-                    <button key={t.val} onClick={()=>setExtraType(t.val)} style={{
-                      padding:'5px 10px',borderRadius:6,fontSize:10,fontFamily:'Exo 2, sans-serif',fontWeight:600,cursor:'pointer',
-                      background:active?tc.bg:'transparent',
-                      color:active?tc.color:'var(--muted)',
-                      border:`1px solid ${active?tc.color:'var(--border)'}`,
-                    }}>{tc.label}</button>
-                  );
-                })}
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
-                <div>
-                  <label style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>TIME (min)</label>
-                  <input type="number" value={extraTime} onChange={e=>setExtraTime(e.target.value)} placeholder="60" style={{width:'100%',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontFamily:'Exo 2, sans-serif',fontSize:16,padding:'9px 10px',outline:'none'}}/>
+        {/* Log extra run — non-accumulated plans only */}
+        {!isAccumulated && (
+          <div style={{marginTop:12}}>
+            <button onClick={()=>setExtraLog(!extraLog)} style={{width:'100%',background:'transparent',border:'1px dashed var(--border)',borderRadius:10,padding:'10px',fontSize:12,color:'var(--muted)',cursor:'pointer',fontFamily:'Exo 2, sans-serif',letterSpacing:1}}>
+              + LOG EXTRA RUN
+            </button>
+            {extraLog&&(
+              <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:14,marginTop:8}}>
+                <div style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:3,marginBottom:10}}>EXTRA RUN</div>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12}}>
+                  {RUN_TYPES.map(t=>{
+                    const tc = SESSION_TYPES[t.val]||SESSION_TYPES.easy;
+                    const active = extraType===t.val;
+                    return(
+                      <button key={t.val} onClick={()=>setExtraType(t.val)} style={{padding:'5px 10px',borderRadius:6,fontSize:10,fontFamily:'Exo 2, sans-serif',fontWeight:600,cursor:'pointer',background:active?tc.bg:'transparent',color:active?tc.color:'var(--muted)',border:`1px solid ${active?tc.color:'var(--border)'}`}}>{tc.label}</button>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>KM</label>
-                  <input type="number" value={extraDist} onChange={e=>setExtraDist(e.target.value)} placeholder="—" step="0.1" style={{width:'100%',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontFamily:'Exo 2, sans-serif',fontSize:16,padding:'9px 10px',outline:'none'}}/>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
+                  <div>
+                    <label style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>TIME (min)</label>
+                    <input type="number" value={extraTime} onChange={e=>setExtraTime(e.target.value)} placeholder="60" style={{width:'100%',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontFamily:'Exo 2, sans-serif',fontSize:16,padding:'9px 10px',outline:'none'}}/>
+                  </div>
+                  <div>
+                    <label style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--muted)',letterSpacing:2,display:'block',marginBottom:4}}>KM</label>
+                    <input type="number" value={extraDist} onChange={e=>setExtraDist(e.target.value)} placeholder="—" step="0.1" style={{width:'100%',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:8,color:'var(--text)',fontFamily:'Exo 2, sans-serif',fontSize:16,padding:'9px 10px',outline:'none'}}/>
+                  </div>
+                </div>
+                <div style={{display:'flex',gap:8}}>
+                  <button onClick={()=>setExtraLog(false)} style={{flex:1,background:'transparent',border:'1px solid var(--border)',borderRadius:9,padding:11,fontSize:13,color:'var(--muted)',cursor:'pointer'}}>Cancel</button>
+                  <button onClick={logExtra} style={{flex:2,background:'var(--green)',color:'#0A0A0A',border:'none',borderRadius:9,padding:11,fontSize:14,fontWeight:700,cursor:'pointer'}}>Log Run</button>
                 </div>
               </div>
-              <div style={{display:'flex',gap:8}}>
-                <button onClick={()=>setExtraLog(false)} style={{flex:1,background:'transparent',border:'1px solid var(--border)',borderRadius:9,padding:11,fontSize:13,color:'var(--muted)',cursor:'pointer'}}>Cancel</button>
-                <button onClick={logExtra} style={{flex:2,background:'var(--green)',color:'#0A0A0A',border:'none',borderRadius:9,padding:11,fontSize:14,fontWeight:700,cursor:'pointer'}}>Log Run</button>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Easy Minutes Modal */}
+      {showEasyModal && (
+        <EasyMinutesModal
+          week={w.week}
+          weekIdx={curWk}
+          easyTarget={easyTarget}
+          easyLogs={weekEasyLogs}
+          onLog={entry => logEasyRun && logEasyRun({ ...entry, weekIdx: curWk, id: Date.now() })}
+          onDelete={id => deleteEasyLog && deleteEasyLog(id)}
+          onClose={() => setShowEasyModal(false)}
+        />
+      )}
     </div>
   );
 }
@@ -256,7 +462,6 @@ function CoachNote({ note }) {
   const preview = note.split('\n')[0].slice(0, 90);
   return (
     <div style={{margin:'0 12px 12px',background:'var(--card)',border:'1px solid var(--border)',borderRadius:10,overflow:'hidden'}}>
-      {/* Green tinted header row */}
       <div style={{display:'flex',alignItems:'center',gap:8,padding:'7px 13px',background:'rgba(0,196,106,0.08)',borderBottom:'1px solid rgba(0,196,106,0.12)'}}>
         <span style={{fontFamily:'Exo 2, sans-serif',fontSize:10,color:'var(--green)',letterSpacing:3,fontWeight:700}}>COACH</span>
         <div style={{width:4,height:4,borderRadius:'50%',background:'var(--green)',opacity:0.4}}/>

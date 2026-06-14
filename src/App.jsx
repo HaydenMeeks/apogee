@@ -17,6 +17,7 @@ export default function App() {
   const [gymLogs, setGymLogs]   = useState(() => DB.get('apogee_gym', {}));
   const [history, setHistory]   = useState(() => DB.get('apogee_hist', []));
   const [weekRatings, setRatings] = useState(() => DB.get('apogee_ratings', {}));
+  const [easyLogs, setEasyLogs] = useState(() => DB.get('apogee_easy', []));
   const [curWk, setCurWk]       = useState(() => getCurWk(DB.get('apogee_plan', BAKED_PLAN)));
   const [theme, setTheme] = useState(() => localStorage.getItem('apogee_theme') || 'dark');
 
@@ -33,6 +34,7 @@ export default function App() {
   useEffect(() => { DB.set('apogee_gym', gymLogs); }, [gymLogs]);
   useEffect(() => { DB.set('apogee_hist', history); }, [history]);
   useEffect(() => { DB.set('apogee_ratings', weekRatings); }, [weekRatings]);
+  useEffect(() => { DB.set('apogee_easy', easyLogs); }, [easyLogs]);
 
   // Auth listener
   useEffect(() => {
@@ -138,6 +140,14 @@ export default function App() {
     if (user) await deleteHistoryEntryFromDB(user.id, entryId);
   }, [user]);
 
+  const logEasyRun = useCallback((entry) => {
+    setEasyLogs(prev => [...prev, entry]);
+  }, []);
+
+  const deleteEasyLog = useCallback((id) => {
+    setEasyLogs(prev => prev.filter(l => l.id !== id));
+  }, []);
+
   if (!authChecked) return <div style={{ background: '#0A0A0A', minHeight: '100vh' }}/>;
   if (!splashDone) return <Splash plan={plan} onEnter={() => setSplashDone(true)} />;
   if (!user) return <AuthScreen onAuth={setUser} />;
@@ -152,6 +162,7 @@ export default function App() {
       tickSession={tickSession} untickSession={untickSession}
       completeWorkout={completeWorkout} saveGymLog={saveGymLog}
       loadPlan={loadPlan} resetPlan={() => loadPlan(BAKED_PLAN)}
+      easyLogs={easyLogs} logEasyRun={logEasyRun} deleteEasyLog={deleteEasyLog}
       user={user} syncing={syncing}
       theme={theme} toggleTheme={toggleTheme}
     />
