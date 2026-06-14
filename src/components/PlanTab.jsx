@@ -3,11 +3,12 @@ import { wkRange, getCurWk, SESSION_TYPES } from '../utils.js';
 import SessionDetail from './SessionDetail.jsx';
 
 // ── EASY MINUTES LOG MODAL ─────────────────────────────────────────────────
-function EasyMinutesModal({ week, weekIdx, easyTarget, easyLogs, onLog, onDelete, onClose }) {
+function EasyMinutesModal({ week, weekIdx, easyTarget, easyLogs, prescribedMins, onLog, onDelete, onClose }) {
   const [mins, setMins] = useState('');
   const [km, setKm] = useState('');
 
-  const totalLogged = easyLogs.reduce((a, l) => a + (parseInt(l.mins) || 0), 0);
+  const modalTotal = easyLogs.reduce((a, l) => a + (parseInt(l.mins) || 0), 0);
+  const totalLogged = modalTotal + (prescribedMins || 0);
   const pct = easyTarget > 0 ? Math.min(100, Math.round((totalLogged / easyTarget) * 100)) : 0;
   const hit = totalLogged >= easyTarget;
 
@@ -62,7 +63,18 @@ function EasyMinutesModal({ week, weekIdx, easyTarget, easyLogs, onLog, onDelete
               borderRadius: 3, transition: 'width 0.5s ease',
             }}/>
           </div>
-          <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: 6, textAlign: 'right' }}>
+          {/* Breakdown */}
+          {prescribedMins > 0 && (
+            <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+              <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)' }}>
+                <span style={{ color: 'var(--green)' }}>{prescribedMins}min</span> from sessions
+              </div>
+              <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)' }}>
+                <span style={{ color: 'var(--green)' }}>{modalTotal}min</span> logged here
+              </div>
+            </div>
+          )}
+          <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: prescribedMins > 0 ? 4 : 6, textAlign: 'right' }}>
             TARGET: {easyTarget}min
           </div>
         </div>
@@ -204,9 +216,28 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
   const isAccumulated = plan.meta?.volumeTracking === 'accumulated_minutes';
   const easyTarget = w.easyMinutesTarget || 0;
 
-  // Easy logs for this week
+  // Easy logs for this week (from modal)
   const weekEasyLogs = (easyLogs || []).filter(l => l.weekIdx === curWk);
-  const totalEasyMins = weekEasyLogs.reduce((a, l) => a + (parseInt(l.mins) || 0), 0);
+  const modalEasyMins = weekEasyLogs.reduce((a, l) => a + (parseInt(l.mins) || 0), 0);
+
+  // Also count completed easy/long/b2b sessions toward easy minutes
+  const EASY_TYPES = ['easy', 'long', 'b2b'];
+  let prescribedEasyMins = 0;
+  if (isAccumulated) {
+    w.sessions.filter(s => EASY_TYPES.includes(s.type)).forEach(s => {
+      const c = completions[`${curWk}_${s.id}`];
+      if (!c?.done) return;
+      if (c?.time) {
+        const p = c.time.split(':');
+        prescribedEasyMins += p.length === 2 ? parseInt(p[0]) * 60 + parseInt(p[1]) : parseFloat(p[0]) || 0;
+      } else {
+        const m = (s.target||'').match(/^(\d+)min/);
+        if (m) prescribedEasyMins += parseInt(m[1]);
+      }
+    });
+  }
+
+  const totalEasyMins = modalEasyMins + prescribedEasyMins;
   const easyPct = easyTarget > 0 ? Math.min(100, Math.round((totalEasyMins / easyTarget) * 100)) : 0;
   const easyHit = easyTarget > 0 && totalEasyMins >= easyTarget;
 
@@ -456,6 +487,7 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
           weekIdx={curWk}
           easyTarget={easyTarget}
           easyLogs={weekEasyLogs}
+          prescribedMins={prescribedEasyMins}
           onLog={entry => logEasyRun && logEasyRun({ ...entry, weekIdx: curWk, id: Date.now() })}
           onDelete={id => deleteEasyLog && deleteEasyLog(id)}
           onClose={() => setShowEasyModal(false)}
