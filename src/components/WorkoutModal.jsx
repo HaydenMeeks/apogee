@@ -30,6 +30,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
   const [historyData, setHistoryData] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const timerRef = useRef(null);
+  const [activeField, setActiveField] = useState(null); // { setIdx, field: 'reps'|'kg' }
 
   // ── WAKE LOCK ────────────────────────────────────────────────────────────
   const wakeLockRef = useRef(null);
@@ -105,7 +106,54 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
 
   const ex = exercises[activeEx];
   const exLog = logs[activeEx] || [];
-  function goToEx(i) { setActiveEx(i); setShowVideo(false); }
+  function goToEx(i) { setActiveEx(i); setShowVideo(false); setActiveField(null); }
+
+  // ── KEYPAD HELPERS ───────────────────────────────────────────────────────
+  const activeValue = activeField ? (logs[activeEx]?.[activeField.setIdx]?.[activeField.field] ?? '') : '';
+
+  function handleKeypadChange(val) {
+    if (!activeField) return;
+    updateSet(activeField.setIdx, activeField.field, val);
+  }
+
+  function handleKeypadPress(key) {
+    const current = String(activeValue);
+    const allowDecimal = activeField?.field === 'kg';
+    if (key === '⌫') { handleKeypadChange(current.slice(0, -1) || ''); }
+    else if (key === '.') { if (allowDecimal && !current.includes('.')) handleKeypadChange(current + '.'); }
+    else if (key === '+') {
+      const n = parseFloat(current) || 0;
+      handleKeypadChange(String(Math.round((n + (allowDecimal ? 2.5 : 1)) * 10) / 10));
+    } else if (key === '−') {
+      const n = parseFloat(current) || 0;
+      handleKeypadChange(String(Math.max(0, Math.round((n - (allowDecimal ? 2.5 : 1)) * 10) / 10)));
+    } else {
+      handleKeypadChange(current === '' || current === '0' ? key : current + key);
+    }
+  }
+
+  function handleKeypadNext() {
+    if (!activeField) return;
+    const fields = [];
+    (logs[activeEx] || []).forEach((_, si) => {
+      fields.push({ setIdx: si, field: 'reps' });
+      fields.push({ setIdx: si, field: 'kg' });
+    });
+    const idx = fields.findIndex(f => f.setIdx === activeField.setIdx && f.field === activeField.field);
+    if (idx < fields.length - 1) setActiveField(fields[idx + 1]);
+    else setActiveField(null);
+  }
+
+  function isLastField() {
+    if (!activeField) return false;
+    const fields = [];
+    (logs[activeEx] || []).forEach((_, si) => {
+      fields.push({ setIdx: si, field: 'reps' });
+      fields.push({ setIdx: si, field: 'kg' });
+    });
+    const idx = fields.findIndex(f => f.setIdx === activeField.setIdx && f.field === activeField.field);
+    return idx === fields.length - 1;
+  }
   const allDone = exercises.every((_, i) => logs[i]?.every(l => l.done));
 
   function updateSet(setIdx, field, val) {
@@ -257,7 +305,7 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
       </div>
 
       {/* ── ACTIVE EXERCISE ── */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px 24px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px 24px', paddingBottom: activeField ? '320px' : '24px' }}>
 
         {/* Exercise header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
@@ -384,19 +432,23 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
                 </div>
                 <div>
                   <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginBottom: 3 }}>REPS</div>
-                  <input value={l.reps} onChange={e => updateSet(si,'reps',e.target.value)} style={{
-                    width: '100%', background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: 6, color: 'var(--text)', fontSize: 15,
-                    fontFamily: 'Exo 2, sans-serif', padding: '6px 8px', outline: 'none',
-                  }}/>
+                  <button onClick={() => setActiveField({ setIdx: si, field: 'reps' })} style={{
+                    width: '100%', minHeight: 40,
+                    background: activeField?.setIdx === si && activeField?.field === 'reps' ? 'rgba(0,196,106,0.12)' : 'var(--surface)',
+                    border: `1px solid ${activeField?.setIdx === si && activeField?.field === 'reps' ? 'var(--green)' : 'var(--border)'}`,
+                    borderRadius: 6, color: l.reps ? 'var(--text)' : 'var(--muted)',
+                    fontSize: 15, fontFamily: 'Exo 2, sans-serif', padding: '6px 8px', textAlign: 'center', cursor: 'pointer',
+                  }}>{l.reps || '—'}</button>
                 </div>
                 <div>
                   <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginBottom: 3 }}>KG</div>
-                  <input value={l.kg} onChange={e => updateSet(si,'kg',e.target.value)} placeholder="—" style={{
-                    width: '100%', background: 'var(--surface)', border: '1px solid var(--border)',
-                    borderRadius: 6, color: 'var(--text)', fontSize: 15,
-                    fontFamily: 'Exo 2, sans-serif', padding: '6px 8px', outline: 'none',
-                  }}/>
+                  <button onClick={() => setActiveField({ setIdx: si, field: 'kg' })} style={{
+                    width: '100%', minHeight: 40,
+                    background: activeField?.setIdx === si && activeField?.field === 'kg' ? 'rgba(0,196,106,0.12)' : 'var(--surface)',
+                    border: `1px solid ${activeField?.setIdx === si && activeField?.field === 'kg' ? 'var(--green)' : 'var(--border)'}`,
+                    borderRadius: 6, color: l.kg ? 'var(--text)' : 'var(--muted)',
+                    fontSize: 15, fontFamily: 'Exo 2, sans-serif', padding: '6px 8px', textAlign: 'center', cursor: 'pointer',
+                  }}>{l.kg || '—'}</button>
                 </div>
                 <button onClick={() => tickSet(si)} style={{
                   width: 44, height: 44, borderRadius: 10,
@@ -445,6 +497,63 @@ export default function WorkoutModal({ session, wkIdx, gymLog, onClose, onComple
           {allDone ? 'Complete ✓' : `Finish (${exercises.filter((_,i) => logs[i]?.every(l => l.done)).length}/${exercises.length})`}
         </button>
       </div>
+
+      {/* ── CUSTOM NUMERIC KEYPAD ── */}
+      {activeField && (
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
+          background: 'var(--surface)', borderTop: '1px solid var(--border)',
+          padding: '10px 12px',
+          paddingBottom: 'calc(10px + env(safe-area-inset-bottom, 0px))',
+        }}>
+          {/* Label + current value */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, padding: '0 4px' }}>
+            <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 11, color: 'var(--green)', letterSpacing: 2 }}>
+              SET {activeField.setIdx + 1} · {activeField.field.toUpperCase()}
+            </div>
+            <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 28, color: activeValue ? 'var(--text)' : 'var(--muted)' }}>
+              {activeValue || '—'}
+            </div>
+          </div>
+          {/* Row 1: 1 2 3 ⌫ */}
+          {[['1','2','3','⌫'],['4','5','6','−'],['7','8','9','+']].map((row, ri) => (
+            <div key={ri} style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 6, marginBottom: 6 }}>
+              {row.map(k => (
+                <button key={k} onClick={() => handleKeypadPress(k)} style={{
+                  height: 50, borderRadius: 10, border: 'none', cursor: 'pointer',
+                  background: k === '⌫' ? 'var(--card2)' : (k === '+' || k === '−') ? 'var(--card)' : 'var(--card)',
+                  color: 'var(--text)',
+                  fontSize: k === '⌫' || k === '+' || k === '−' ? 18 : 20,
+                  fontFamily: 'Archivo Black, sans-serif',
+                  WebkitTapHighlightColor: 'transparent',
+                }}>{k}</button>
+              ))}
+            </div>
+          ))}
+          {/* Row 4: . 0 Next/Done */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 6 }}>
+            <button onClick={() => handleKeypadPress('.')} style={{
+              height: 50, borderRadius: 10, border: 'none', cursor: 'pointer',
+              background: 'var(--card)', color: activeField?.field === 'kg' ? 'var(--text)' : 'var(--muted)',
+              fontSize: 20, fontFamily: 'Archivo Black, sans-serif',
+              opacity: activeField?.field === 'kg' ? 1 : 0.3,
+              WebkitTapHighlightColor: 'transparent',
+            }}>.</button>
+            <button onClick={() => handleKeypadPress('0')} style={{
+              height: 50, borderRadius: 10, border: 'none', cursor: 'pointer',
+              background: 'var(--card)', color: 'var(--text)',
+              fontSize: 20, fontFamily: 'Archivo Black, sans-serif',
+              WebkitTapHighlightColor: 'transparent',
+            }}>0</button>
+            <button onClick={isLastField() ? () => setActiveField(null) : handleKeypadNext} style={{
+              height: 50, borderRadius: 10, border: 'none', cursor: 'pointer',
+              background: 'var(--green)', color: '#0A0A0A',
+              fontSize: 13, fontFamily: 'Exo 2, sans-serif', fontWeight: 800, letterSpacing: 1,
+              WebkitTapHighlightColor: 'transparent',
+            }}>{isLastField() ? 'DONE ✓' : 'NEXT →'}</button>
+          </div>
+        </div>
+      )}
 
       {/* ── FULL SCREEN REST TIMER ── */}
       {RestScreen}
