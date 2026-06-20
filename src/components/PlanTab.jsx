@@ -160,11 +160,110 @@ function EasyMinutesModal({ week, weekIdx, easyTarget, easyLogs, prescribedMins,
   );
 }
 
+// ── KM BREAKDOWN MODAL ─────────────────────────────────────────────────────
+function KmBreakdownModal({ week, totalKm, breakdown, onClose }) {
+  const sorted = [...breakdown].sort((a, b) => {
+    const da = a.date ? new Date(a.date).getTime() : 0;
+    const db = b.date ? new Date(b.date).getTime() : 0;
+    return db - da;
+  });
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 300,
+      background: 'rgba(0,0,0,0.7)', display: 'flex',
+      alignItems: 'flex-end', backdropFilter: 'blur(4px)',
+    }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{
+        width: '100%', background: 'var(--card)',
+        borderRadius: '20px 20px 0 0', padding: '20px 16px',
+        paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+        maxHeight: '85vh', overflowY: 'auto',
+      }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--green)', letterSpacing: 3 }}>WEEK {week}</div>
+            <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 20, color: 'var(--text)', marginTop: 2 }}>Kilometres</div>
+          </div>
+          <button onClick={onClose} style={{
+            width: 36, height: 36, borderRadius: '50%', background: 'var(--surface)',
+            border: '1px solid var(--border)', color: 'var(--muted)', fontSize: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+          }}>✕</button>
+        </div>
+
+        {/* Total */}
+        <div style={{
+          background: 'var(--surface)', border: '1px solid var(--green)',
+          borderRadius: 12, padding: '14px 16px', marginBottom: 16,
+        }}>
+          <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 32, color: 'var(--green)', lineHeight: 1 }}>
+            {totalKm.toFixed(1)}<span style={{ fontSize: 14, fontWeight: 400, color: 'var(--muted)', marginLeft: 4 }}>km</span>
+          </div>
+          <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>
+            FROM {breakdown.length} {breakdown.length === 1 ? 'ACTIVITY' : 'ACTIVITIES'} THIS WEEK
+          </div>
+        </div>
+
+        {/* List */}
+        <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', letterSpacing: 3, marginBottom: 10 }}>BREAKDOWN</div>
+        {sorted.map((item, i) => (
+          <div key={item.id || i} style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '10px 12px', background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 10, marginBottom: 8,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+              <div style={{
+                width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                background: item.source === 'log' ? '#3B82F6' : 'var(--green)',
+              }}/>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 13, fontWeight: 700, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.name}
+                </div>
+                <div style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>
+                  {item.date ? new Date(item.date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) : ''}
+                  {item.time ? ` · ${item.time}` : ''}
+                  {item.mins ? ` · ${item.mins}min` : ''}
+                </div>
+              </div>
+            </div>
+            <div style={{ fontFamily: 'Archivo Black, sans-serif', fontSize: 16, color: 'var(--text)', flexShrink: 0, marginLeft: 8 }}>
+              {item.km.toFixed(1)}<span style={{ fontSize: 10, color: 'var(--muted)', fontWeight: 400 }}>km</span>
+            </div>
+          </div>
+        ))}
+
+        {breakdown.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '16px 0', color: 'var(--muted)', fontFamily: 'Exo 2, sans-serif', fontSize: 11, letterSpacing: 1 }}>
+            NO DISTANCE LOGGED YET THIS WEEK
+          </div>
+        )}
+
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: 16, marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--green)' }}/>
+            <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)' }}>Prescribed session</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#3B82F6' }}/>
+            <span style={{ fontFamily: 'Exo 2, sans-serif', fontSize: 10, color: 'var(--muted)' }}>Logged run</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── MAIN COMPONENT ─────────────────────────────────────────────────────────
 export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, tickSession, untickSession, completeWorkout, saveGymLog, setPlanModal, history, setHistory, user, easyLogs, logEasyRun, deleteEasyLog }) {
   const [detailSession, setDetailSession] = useState(null);
   const [celebrating, setCelebrating] = useState(false);
   const [showEasyModal, setShowEasyModal] = useState(false);
+  const [showKmModal, setShowKmModal] = useState(false);
   const [extraLog, setExtraLog] = useState(false);
   const [extraType, setExtraType] = useState('easy');
   const [extraTime, setExtraTime] = useState('');
@@ -250,6 +349,7 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
   const tHrs = parseFloat(w.targets?.hrs || 0);
 
   let logHrs = 0, logKm = 0;
+  const kmBreakdown = [];
   w.sessions.forEach(s => {
     const c = completions[`${curWk}_${s.id}`];
     if (!c?.done) return;
@@ -262,11 +362,22 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
     } else {
       if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1])/60 : parseFloat(p[0])||0; }
       else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1])/60; }
-      if (c?.dist) logKm += parseFloat(c.dist)||0;
+      if (c?.dist) {
+        const d = parseFloat(c.dist) || 0;
+        logKm += d;
+        if (d > 0) kmBreakdown.push({ id: s.id, name: s.name, km: d, time: c.time || null, date: c.date || null, source: 'session' });
+      }
     }
   });
-  // For accumulated plans, also count easy logs toward hrs
-  if (isAccumulated) logHrs += totalEasyMins / 60;
+  // For accumulated plans, also count easy logs toward hrs and km
+  if (isAccumulated) {
+    logHrs += totalEasyMins / 60;
+    weekEasyLogs.forEach(l => {
+      const d = parseFloat(l.km) || 0;
+      logKm += d;
+      if (d > 0) kmBreakdown.push({ id: l.id, name: 'Logged Easy Run', km: d, mins: l.mins, date: l.date, source: 'log' });
+    });
+  }
 
   const hrsPct = tHrs > 0 ? Math.min(100, Math.round((logHrs/tHrs)*100)) : 0;
   const runsDone = runs.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
@@ -308,7 +419,7 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
       : { val: logHrs>0 ? logHrs.toFixed(1) : (w.targets?.hrs||'—'),
           lbl: logHrs>0 ? 'HRS DONE' : 'HRS TARGET',
           hit: logHrs>0, tap: null },
-    { val: logKm>0 ? logKm.toFixed(0)+'km' : '—', lbl:'KM DONE', hit:logKm>0, tap:null },
+    { val: logKm>0 ? logKm.toFixed(0)+'km' : '—', lbl:'KM DONE', hit:logKm>0, tap: logKm > 0 ? () => setShowKmModal(true) : null },
   ];
 
   return (
@@ -491,6 +602,14 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
           onLog={entry => logEasyRun && logEasyRun({ ...entry, weekIdx: curWk, id: Date.now() })}
           onDelete={id => deleteEasyLog && deleteEasyLog(id)}
           onClose={() => setShowEasyModal(false)}
+        />
+      )}
+      {showKmModal && (
+        <KmBreakdownModal
+          week={w.week}
+          totalKm={logKm}
+          breakdown={kmBreakdown}
+          onClose={() => setShowKmModal(false)}
         />
       )}
     </div>
