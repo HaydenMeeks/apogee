@@ -33,16 +33,27 @@ export default function OverviewTab({ plan, completions }) {
   const races = plan.meta.races || [];
 
   // Build km data
+  const isAccumulated = plan.meta?.volumeTracking === 'accumulated_minutes';
   const wkData = plan.weeks.map((w,idx) => {
-    // Calculate km from actual session minutes (mid-range pace estimate)
-    let runMins = 0;
     const raceKm = w.sessions.filter(s=>s.type==='race').reduce((a,s)=>a+(s.km||0),0);
-    w.sessions.forEach(s => {
-      if (s.isGym || s.type === 'vest' || s.type === 'race') return;
-      const m = (s.target||'').match(/^~?(\d+)min/);
-      if (m) runMins += parseInt(m[1]);
-    });
-    const km = Math.round(runMins / 60 * 9.5) + raceKm;
+    let km;
+    if (isAccumulated) {
+      // Accumulated-minutes plans: the easy minutes target IS the volume
+      // metric (covers structured + unplanned trail time). Rough flat
+      // conversion at 9km/h, per Hayden.
+      km = Math.round((w.easyMinutesTarget||0) / 60 * 9) + raceKm;
+    } else {
+      // Session-checklist plans (e.g. Bron): sum from session minutes,
+      // preferring an explicit km field when a session provides one.
+      let runMins = 0, sessionKm = 0;
+      w.sessions.forEach(s => {
+        if (s.isGym || s.type === 'vest' || s.type === 'race') return;
+        if (typeof s.km === 'number') { sessionKm += s.km; return; }
+        const m = (s.target||'').match(/^~?(\d+)min/);
+        if (m) runMins += parseInt(m[1]);
+      });
+      km = Math.round(runMins / 60 * 9.5) + Math.round(sessionKm) + raceKm;
+    }
     const ws = new Date(start.getTime()+idx*7*86400000);
     return {
       wk:w.week, km, hasRace:w.sessions.some(s=>s.type==='race'),
