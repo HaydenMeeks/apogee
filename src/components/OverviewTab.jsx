@@ -19,7 +19,7 @@ export default function OverviewTab({ plan, completions }) {
   // Calculate hours from targets.hrs if set, otherwise sum session target minutes
   function calcWeekHrs(w) {
     if (w.targets?.hrs) return w.targets.hrs;
-    const runTypes = ['easy','long','b2b','speed','vest','race'];
+    const runTypes = ['easy','long','b2b','speed','vest','hike','race'];
     let mins = 0;
     w.sessions.forEach(s => {
       if (!runTypes.includes(s.type)) return;
@@ -47,7 +47,7 @@ export default function OverviewTab({ plan, completions }) {
       // preferring an explicit km field when a session provides one.
       let runMins = 0, sessionKm = 0;
       w.sessions.forEach(s => {
-        if (s.isGym || s.type === 'vest' || s.type === 'race') return;
+        if (s.isGym || ['vest','hike','mobility','race'].includes(s.type)) return;
         if (typeof s.km === 'number') { sessionKm += s.km; return; }
         const m = (s.target||'').match(/^~?(\d+)min/);
         if (m) runMins += parseInt(m[1]);

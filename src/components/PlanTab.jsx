@@ -340,10 +340,12 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
   const easyPct = easyTarget > 0 ? Math.min(100, Math.round((totalEasyMins / easyTarget) * 100)) : 0;
   const easyHit = easyTarget > 0 && totalEasyMins >= easyTarget;
 
-  const runs = w.sessions.filter(s => !s.isGym && s.type !== 'vest');
-  const vests = w.sessions.filter(s => s.type === 'vest');
+  const NON_RUN_TYPES = ['vest', 'hike', 'mobility'];
+  const runs = w.sessions.filter(s => !s.isGym && !NON_RUN_TYPES.includes(s.type));
+  const vests = w.sessions.filter(s => NON_RUN_TYPES.includes(s.type));
   const gyms = w.sessions.filter(s => s.isGym);
-  const nonRest = w.sessions.filter(s => s.type !== 'rest');
+  // 'mobility' is optional by design — excluded so the week can still hit 100%
+  const nonRest = w.sessions.filter(s => s.type !== 'rest' && s.type !== 'mobility');
   const done = nonRest.filter(s => completions[`${curWk}_${s.id}`]?.done).length;
   const pct = nonRest.length > 0 ? Math.round((done / nonRest.length) * 100) : 0;
   const tHrs = parseFloat(w.targets?.hrs || 0);
@@ -356,7 +358,7 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
     if (s.isGym) {
       const m = (s.target||'').match(/~?(\d+)min/);
       if (m) logHrs += parseInt(m[1]) / 60;
-    } else if (s.type === 'vest') {
+    } else if (NON_RUN_TYPES.includes(s.type)) {
       if (c?.time) { const p = c.time.split(':'); logHrs += p.length === 2 ? parseInt(p[0]) + parseInt(p[1])/60 : parseFloat(p[0])/60||0; }
       else { const m = (s.target||'').match(/^(\d+)min/); if (m) logHrs += parseInt(m[1])/60; }
     } else {
@@ -389,6 +391,7 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
     { val:'b2b',  label:'B2B' },
     { val:'speed',label:'Speed' },
     { val:'vest', label:'Vest' },
+    { val:'hike', label:'Incline Hike' },
   ];
 
   const logExtra = () => {
@@ -541,7 +544,7 @@ export default function PlanTab({ plan, completions, gymLogs, curWk, setCurWk, t
           ))}
         </>}
         {vests.length>0&&<>
-          <SectionLabel>Vest ({vests.length})</SectionLabel>
+          <SectionLabel>Hike &amp; Mobility ({vests.length})</SectionLabel>
           {vests.map(s=>(
             <SessionRow key={s.id} session={s} completion={completions[`${curWk}_${s.id}`]} onTap={()=>setDetailSession({session:s,wkIdx:curWk})}/>
           ))}
