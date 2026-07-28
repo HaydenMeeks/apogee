@@ -6,6 +6,8 @@ export const DB = {
 export const SESSION_TYPES = {
   easy:  { label: 'EASY Z2',   color: '#3B82F6', bg: 'rgba(59,130,246,.15)'  },
   vest:  { label: 'VEST',      color: '#EC4899', bg: 'rgba(236,72,153,.15)'  },
+  hike:  { label: 'INCLINE HIKE', color: '#F97316', bg: 'rgba(249,115,22,.15)' },
+  mobility: { label: 'OPTIONAL', color: '#A1A1AA', bg: 'rgba(161,161,170,.15)' },
   speed: { label: 'SPEED',     color: '#F59E0B', bg: 'rgba(245,158,11,.15)'  },
   long:  { label: 'LONG RUN',  color: '#10B981', bg: 'rgba(16,185,129,.15)'  },
   b2b:   { label: 'B2B',       color: '#8B5CF6', bg: 'rgba(139,92,246,.15)'  },
